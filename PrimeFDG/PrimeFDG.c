@@ -15,12 +15,12 @@ int main()
 	PFDG_TIMESTAMP start, end;
 	pfdg_timestamp_get(&start);
 	// 1 billion test
-	const uint64_t res = pfdg_sieve_parallel(0, 1000000000, num_threads, "C:\\Users\\Oron\\t.2");
+	const uint64_t res = pfdg_sieve_parallel(0, 1000000000, num_threads, "D:\\test.pfdg");
 	pfdg_timestamp_get(&end);
 	const PFDG_TIMESTAMP diff = pfdg_timestamp_diff(start, end);
 	printf("Time: %f seconds\n", pfdg_timestamp_microseconds(diff) / 1000000.0);
 	printf("Number of primes found: %llu\n", res);
-	//pfdg_generate_pattern(7, "C:\\Users\\Oron\\Documents\\GitHub\\PrimeFDG\\PrimeFDG\\pattern.h");
+	//pfdg_generate_pattern(7, "D:\\pattern.h");
 	system("pause");
     return 0;
 }
