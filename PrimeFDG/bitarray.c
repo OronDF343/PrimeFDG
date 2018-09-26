@@ -10,6 +10,7 @@ bitarray * bitarray_create(const uint64_t capacity, const bool oddonly)
 	// Allocate memory
 	bitarray * b = malloc(sizeof(bitarray));
 	b->data = malloc(wr * sizeof(BITARRAY_WORD));
+	if (!b->data) return 0;
 	// Set fields
 	b->oddonly = oddonly;
 	b->capacity = capacity;

@@ -6,6 +6,7 @@
 bitarray* pfdg_init_bitarray(const uint64_t capacity, const uint64_t offset, const bool use_pattern)
 {
 	bitarray* arr = bitarray_create(capacity, true);
+	if (!arr) return 0;
 
 	// Length of data in words
 	const uint64_t len = arr->actual_capacity / BITS(BITARRAY_WORD);
@@ -77,10 +78,11 @@ void pfdg_sieve(bitarray* const arr, bitarray* const known, const uint64_t offse
 			pfdg_mark(arr, i, offset);
 }
 
-uint64_t pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_t chunks, const char * const file)
+bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_t chunks, const char * const file, uint64_t * const prime_count)
 {
 	// Step 1
 	bitarray* const known = pfdg_init_bitarray((uint64_t)sqrt((double)end) + 1, 0, true);
+	if (!known) return UINT64_MAX;
 	pfdg_sieve_seed(known, true);
 	/*FILE* k;
 	fopen_s(&k, "C:\\Users\\Oron\\k.2", "ab");
@@ -88,7 +90,7 @@ uint64_t pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uin
 
 	// Step 2 parameters
 	const uint64_t len = end - start;
-	uint64_t prime_count = 0;
+	*prime_count = 0;
 	uint64_t chunk_size = DIVUP(len, chunks);
 	chunk_size = DIVUP(chunk_size, BITS(BITARRAY_WORD) * 2) * BITS(BITARRAY_WORD) * 2;
 
@@ -106,43 +108,60 @@ uint64_t pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uin
 
 	// Step 2
 	// Run loop in parallel, but must be ORDERED when saving files!
+	bool abort = false;
 	// IMPORTANT: DO NOT JOIN DECLARATION AND ASSIGNMENT for OpenMP iterators!!! MSVC hates this!!!
 	// ReSharper disable CppJoinDeclarationAndAssignment
 	int64_t i;
 #pragma omp parallel for ordered schedule(static,1)
 	for (i = 0; i < (int64_t)chunks; ++i)
 	{
-		// ReSharper restore CppJoinDeclarationAndAssignment
-		const uint64_t offset = start + chunk_size * i;
-		// Create bitarray
-		bitarray* const arr = pfdg_init_bitarray(i == chunks - 1 ? len - chunk_size * i : chunk_size, offset, true);
-		// Sieve it!
-		pfdg_sieve(arr, known, offset, true);
-		// Count the primes
-		const uint64_t count = bitarray_count(arr, false);
-		// Increment counter atomically to prevent race conditions
-#pragma omp atomic
-		prime_count += count;
-		// Write chunks to file in order!
-#pragma omp ordered
+		// http://www.thinkingparallel.com/2007/06/29/breaking-out-of-loops-in-openmp/
+#pragma omp flush (abort)
+		if (!abort)
 		{
-			bitarray_serialize_to_file(arr, f);
+			// ReSharper restore CppJoinDeclarationAndAssignment
+			const uint64_t offset = start + chunk_size * i;
+			// Create bitarray
+			bitarray* const arr = pfdg_init_bitarray(i == chunks - 1 ? len - chunk_size * i : chunk_size, offset, true);
+			// Abort if out of memory
+			if (!arr)
+			{
+				abort = true;
+#pragma omp flush (abort)
+			}
+			// Sieve it!
+			pfdg_sieve(arr, known, offset, true);
+			// Count the primes
+			const uint64_t count = bitarray_count(arr, false);
+			// Increment counter atomically to prevent race conditions
+#pragma omp atomic
+			*prime_count += count;
+			// Write chunks to file in order!
+#pragma omp ordered
+			{
+				bitarray_serialize_to_file(arr, f);
+			}
+			// Free up the memory
+			bitarray_delete(arr);
 		}
-		// Free up the memory
-		bitarray_delete(arr);
 	}
+
+	// Handle abortion
+	if (abort) return false;
 
 	// Write number of primes found
 	fseek(f, 40, SEEK_SET);
-	fwrite(&prime_count, sizeof(uint64_t), 1, f);
+	fwrite(prime_count, sizeof(uint64_t), 1, f);
 	// Close file
 	fclose(f);
-	return prime_count;
+	return true;
 }
 
-void pfdg_generate_pattern(const uint64_t last_prime, const char * const file)
+// Generate precomputed pattern.h
+bool pfdg_generate_pattern(const uint64_t last_prime, const char * const file)
 {
 	bitarray* known = pfdg_init_bitarray(last_prime + 1, 0, true);
+	if (!known) return false;
 	pfdg_sieve_seed(known, false);
 	uint64_t len = 1;
 	for (uint64_t i = 3; i <= last_prime; i+=2)
@@ -150,6 +169,7 @@ void pfdg_generate_pattern(const uint64_t last_prime, const char * const file)
 			len *= i;
 
 	bitarray* arr = pfdg_init_bitarray((len + 1) * 2 * BITS(BITARRAY_WORD), 0, false);
+	if (!arr) return false;
 	pfdg_sieve(arr, known, 0, false);
 	bitarray_delete(known);
 
@@ -167,4 +187,5 @@ void pfdg_generate_pattern(const uint64_t last_prime, const char * const file)
 	fprintf_s(f, "};\n");
 	fclose(f);
 	bitarray_delete(arr);
+	return true;
 }
