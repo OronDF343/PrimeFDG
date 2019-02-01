@@ -2,6 +2,7 @@
 #include "pfdg.h"
 #include <math.h>
 #include "pattern.h"
+#include "utils.h"
 
 bitarray* pfdg_init_bitarray(const uint64_t capacity, const uint64_t offset, const bool use_pattern)
 {
@@ -26,14 +27,14 @@ bitarray* pfdg_init_bitarray(const uint64_t capacity, const uint64_t offset, con
 		if (align > 0)
 		{
 			const uint64_t cp = (PFDG_PATTERN_LENGTH - align) * sizeof(BITARRAY_WORD);
-			memcpy_s(arr->data, cp, pfdg_pattern + align, cp);
+			memcpy_aligned8(arr->data, cp, pfdg_pattern + align, cp);
 			i += PFDG_PATTERN_LENGTH - align;
 		}
 		// Fill the rest with the pattern
 		for (; i < len; i += PFDG_PATTERN_LENGTH)
 		{
 			const uint64_t cp = (len - i) * sizeof(BITARRAY_WORD);
-			memcpy_s(arr->data + i, cp, pfdg_pattern, __min(cp, PFDG_PATTERN_LENGTH * sizeof(BITARRAY_WORD)));
+			memcpy_aligned8(arr->data + i, cp, pfdg_pattern, __min(cp, PFDG_PATTERN_LENGTH * sizeof(BITARRAY_WORD)));
 		}
 	}
 	else
@@ -59,9 +60,16 @@ void pfdg_mark(bitarray* const arr, const uint64_t prime, const uint64_t offset)
 	if (i < prime) i = prime;
 	// Odd multiples only
 	else if (i % 2 == 0) ++i;
-	// 
-	for (; i * prime - offset < arr->capacity; i += 2)
-		bitarray_set(arr, i * prime - offset);
+	// Reference implementation:
+	/*for (; i * prime - offset < arr->capacity; i += 2)
+		bitarray_set(arr, i * prime - offset);*/
+	// Janky OpenMP SIMD implementation: (sometimes has ~10% performance improvement)
+	uint64_t j;
+#if _MSC_VER >= 1920 
+#pragma omp simd
+#endif
+	for (j = i / 2; j < (uint64_t)ceil(((arr->capacity + offset) / (double) prime - 1) / 2.0); j++)
+		bitarray_set(arr, (j * 2 + 1) * prime - offset);
 }
 
 void pfdg_sieve_seed(bitarray* const arr, const bool skip)
@@ -181,7 +189,7 @@ bool pfdg_generate_pattern(const uint64_t last_prime, const char * const file)
 			break;
 	fprintf_s(f, "#pragma once\n\n#include \"stdafx.h\"\n\n// The prime from which to start the sieveing loop\n#define PFDG_PATTERN_SKIP %llu\n// The length of the precomputed pattern\n#define PFDG_PATTERN_LENGTH %llu\n", next_prime, len);
 
-	fprintf_s(f, "// The prefix of the precomputed pattern\nconst BITARRAY_WORD pfdg_pattern_prefix = 0x%.16llX;\n// The precomputed pattern data\nconst BITARRAY_WORD pfdg_pattern[PFDG_PATTERN_LENGTH] =\n{\n", arr->data[0]);
+	fprintf_s(f, "// The prefix of the precomputed pattern\nstatic const BITARRAY_WORD pfdg_pattern_prefix = 0x%.16llX;\n// The precomputed pattern data\nstatic const __declspec(align(32)) BITARRAY_WORD pfdg_pattern[PFDG_PATTERN_LENGTH] =\n{\n", arr->data[0]);
 	for (uint64_t i = 1; i < arr->actual_capacity / BITS(BITARRAY_WORD); ++i)
 		fprintf_s(f, "\t0x%.16llX,\n", arr->data[i]);
 	fprintf_s(f, "};\n");

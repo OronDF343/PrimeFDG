@@ -9,7 +9,8 @@ bitarray * bitarray_create(const uint64_t capacity, const bool oddonly)
 	const uint64_t wr = DIVUP(br, BITS(BITARRAY_WORD));
 	// Allocate memory
 	bitarray * b = malloc(sizeof(bitarray));
-	b->data = malloc(wr * sizeof(BITARRAY_WORD));
+	// Aligned just in case we ever use SIMD
+	b->data = _aligned_malloc(wr * sizeof(BITARRAY_WORD), 32);
 	if (!b->data) return 0;
 	// Set fields
 	b->oddonly = oddonly;
@@ -18,7 +19,7 @@ bitarray * bitarray_create(const uint64_t capacity, const bool oddonly)
 	return b;
 }
 
-void bitarray_set(bitarray * const b, const uint64_t i)
+void __forceinline bitarray_set(bitarray * const b, const uint64_t i)
 {
 	const uint64_t ia = b->oddonly ? i / 2 : i;
 	b->data[ia / BITS(BITARRAY_WORD)] |= OR_MASK(ia & (BITS(BITARRAY_WORD) - 1));
@@ -56,7 +57,7 @@ uint64_t bitarray_count(bitarray * const arr, const bool value)
 
 void bitarray_delete(bitarray * arr)
 {
-	free(arr->data);
+	_aligned_free(arr->data);
 	free(arr);
 }
 

@@ -7,9 +7,9 @@
 // The length of the precomputed pattern
 #define PFDG_PATTERN_LENGTH 1155
 // The prefix of the precomputed pattern
-const BITARRAY_WORD pfdg_pattern_prefix = 0x7E92ED659B4B3491;
+static const BITARRAY_WORD pfdg_pattern_prefix = 0x7E92ED659B4B3491;
 // The precomputed pattern data
-const BITARRAY_WORD pfdg_pattern[PFDG_PATTERN_LENGTH] =
+static const __declspec(align(32)) BITARRAY_WORD pfdg_pattern[PFDG_PATTERN_LENGTH] =
 {
 	0xD6693DF279A5B3CD,
 	0x4B669EDDA5DACB36,

@@ -24,3 +24,5 @@ Test | 1 thread | 2 threads | 4 threads | 8 threads | 16 threads
 --- | --- | --- | --- | --- | ---
 1Gp Vol.1 | 3.605 | 2.2877 | 1.562 | 1.2344 | 0.7560
 10Gp Vol.1 | 43.939 | 28.131 | 18.266 | 15.503 | 15.244
+
+NOTE: The latest version, if compiled with Visual Studio 2019 Preview 2.0, may yield up to 10% better performance in some cases
