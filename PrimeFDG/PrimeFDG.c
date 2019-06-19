@@ -6,6 +6,7 @@
 #include "timer.h"
 #include "utils.h"
 #include "pattern.h"
+#include "cpuid.h"
 
 void print_timestamp_diff(const PFDG_TIMESTAMP t_start, const PFDG_TIMESTAMP t_end)
 {
@@ -80,6 +81,7 @@ void fill_test_omp(const uint64_t test_size, const int threads)
 
 int main(const int argc, const char** argv)
 {
+	cpuid_init();
 	if (argc < 5)
 	{
 		if (argc == 2 && strcmp(argv[1], "test") == 0)

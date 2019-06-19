@@ -64,11 +64,12 @@ void pfdg_mark(bitarray* const arr, const uint64_t prime, const uint64_t offset)
 	/*for (; i * prime - offset < arr->capacity; i += 2)
 		bitarray_set(arr, i * prime - offset);*/
 	// Janky OpenMP SIMD implementation: (sometimes has ~10% performance improvement)
+	// ReSharper disable twice CppJoinDeclarationAndAssignment
 	uint64_t j;
 #if _MSC_VER >= 1920 
 #pragma omp simd
 #endif
-	for (j = i / 2; j < (uint64_t)ceil(((arr->capacity + offset) / (double) prime - 1) / 2.0); j++)
+	for (j = i / 2; j < (uint64_t)ceil(((double)(arr->capacity + offset) / (double) prime - 1) / 2.0); j++)
 		bitarray_set(arr, (j * 2 + 1) * prime - offset);
 }
 
@@ -118,7 +119,7 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_
 	// Run loop in parallel, but must be ORDERED when saving files!
 	bool abort = false;
 	// IMPORTANT: DO NOT JOIN DECLARATION AND ASSIGNMENT for OpenMP iterators!!! MSVC hates this!!!
-	// ReSharper disable CppJoinDeclarationAndAssignment
+	// ReSharper disable twice CppJoinDeclarationAndAssignment
 	int64_t i;
 #pragma omp parallel for ordered schedule(static,1)
 	for (i = 0; i < (int64_t)chunks; ++i)

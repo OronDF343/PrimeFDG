@@ -162,6 +162,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="bitarray.h" />
+    <ClInclude Include="cpuid.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="options.h" />
     <ClInclude Include="pattern.h" />
@@ -173,6 +174,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bitarray.c" />
+    <ClCompile Include="cpuid.c" />
     <ClCompile Include="pfdg.c" />
     <ClCompile Include="PrimeFDG.c" />
     <ClCompile Include="stdafx.c">

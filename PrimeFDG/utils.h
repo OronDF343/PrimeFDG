@@ -31,8 +31,8 @@ static void memcpy_aligned32_avx(void*       const destination,
 	rsize_t i;
 	for (i = 0; i < __min(source_size, destination_size) / 32; ++i)
 	{
-		__m256 tmp = _mm256_loadu_ps(src);
-		_mm256_storeu_ps(dest, tmp);
+		__m256 tmp = _mm256_loadu_ps((float*)src);
+		_mm256_storeu_ps((float*)dest, tmp);
 		dest += 4;
 		src += 4;
 	}
@@ -49,8 +49,8 @@ static void memcpy_aligned16_sse(void*       const destination,
 	rsize_t i;
 	for (i = 0; i < __min(source_size, destination_size) / 16; ++i)
 	{
-		__m128 tmp = _mm_loadu_ps(src);
-		_mm_storeu_ps(dest, tmp);
+		__m128 tmp = _mm_loadu_ps((float*)src);
+		_mm_storeu_ps((float*)dest, tmp);
 		dest += 2;
 		src += 2;
 	}

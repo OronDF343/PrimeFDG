@@ -1,5 +1,7 @@
 #include "stdafx.h"
+#include "cpuid.h"
 #include "bitarray.h"
+#include <intrin.h>
 
 bitarray * bitarray_create(const uint64_t capacity, const bool oddonly)
 {
@@ -9,6 +11,7 @@ bitarray * bitarray_create(const uint64_t capacity, const bool oddonly)
 	const uint64_t wr = DIVUP(br, BITS(BITARRAY_WORD));
 	// Allocate memory
 	bitarray * b = malloc(sizeof(bitarray));
+	if (!b) return 0;
 	// Aligned just in case we ever use SIMD
 	b->data = _aligned_malloc(wr * sizeof(BITARRAY_WORD), 32);
 	if (!b->data) return 0;
@@ -45,12 +48,25 @@ bool bitarray_get(bitarray * const b, const uint64_t i)
 uint64_t bitarray_count(bitarray * const arr, const bool value)
 {
 	uint64_t count = 0;
-	for (uint64_t c = 0; c < arr->actual_capacity / BITS(BITARRAY_WORD); ++c)
+	if (cpuid_popcnt)
 	{
-		if (value)
-			count += bitcount(arr->data[c]);
-		else
-			count += BITS(BITARRAY_WORD) - bitcount(arr->data[c]);
+		for (uint64_t c = 0; c < arr->actual_capacity / BITS(BITARRAY_WORD); ++c)
+		{
+			if (value)
+				count += POPCNT(arr->data[c]);
+			else
+				count += POPCNT(~arr->data[c]);
+		}
+	}
+	else
+	{
+		for (uint64_t c = 0; c < arr->actual_capacity / BITS(BITARRAY_WORD); ++c)
+		{
+			if (value)
+				count += bitcount(arr->data[c]);
+			else
+				count += bitcount(~arr->data[c]);
+		}
 	}
 	return count;
 }
