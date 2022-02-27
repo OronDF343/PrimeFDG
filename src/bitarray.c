@@ -1,7 +1,12 @@
 #include "stdafx.h"
 #include "cpuid.h"
 #include "bitarray.h"
+#include "pfmath.h"
+#ifdef __GNUC__
+#include <x86intrin.h>
+#else
 #include <intrin.h>
+#endif
 
 bitarray * bitarray_create(const uint64_t capacity, const bool oddonly)
 {
@@ -13,7 +18,8 @@ bitarray * bitarray_create(const uint64_t capacity, const bool oddonly)
 	bitarray * b = malloc(sizeof(bitarray));
 	if (!b) return 0;
 	// Aligned just in case we ever use SIMD
-	b->data = _aligned_malloc(wr * sizeof(BITARRAY_WORD), 32);
+	const uint64_t bytes = DIVUP(wr * sizeof(BITARRAY_WORD), 32) * 32;
+	b->data = _aligned_malloc(bytes, 32);
 	if (!b->data) return 0;
 	// Set fields
 	b->oddonly = oddonly;

@@ -3,14 +3,15 @@
 #include <xmmintrin.h>
 #include <immintrin.h>
 
+#if _MSC_VER
 static void memcpy_aligned64_avx2(void*       const destination,
-				 rsize_t     const destination_size,
+				 size_t     const destination_size,
 				 void const* const source,
-				 rsize_t     const source_size)
+				 size_t     const source_size)
 {
 	uint64_t* src = (uint64_t*) source;
 	uint64_t* dest = (uint64_t*) destination;
-	rsize_t i;
+	size_t i;
 	for (i = 0; i < __min(source_size, destination_size) / 64; ++i)
 	{
 		__m512 tmp = _mm512_loadu_ps(src);
@@ -20,15 +21,16 @@ static void memcpy_aligned64_avx2(void*       const destination,
 	}
 	_mm256_zeroupper();
 }
+#endif
 
 static void memcpy_aligned32_avx(void*       const destination,
-				 rsize_t     const destination_size,
+				 size_t     const destination_size,
 				 void const* const source,
-				 rsize_t     const source_size)
+				 size_t     const source_size)
 {
 	uint64_t* src = (uint64_t*) source;
 	uint64_t* dest = (uint64_t*) destination;
-	rsize_t i;
+	size_t i;
 	for (i = 0; i < __min(source_size, destination_size) / 32; ++i)
 	{
 		__m256 tmp = _mm256_loadu_ps((float*)src);
@@ -40,13 +42,13 @@ static void memcpy_aligned32_avx(void*       const destination,
 }
 
 static void memcpy_aligned16_sse(void*       const destination,
-				 rsize_t     const destination_size,
+				 size_t     const destination_size,
 				 void const* const source,
-				 rsize_t     const source_size)
+				 size_t     const source_size)
 {
 	uint64_t* src = (uint64_t*) source;
 	uint64_t* dest = (uint64_t*) destination;
-	rsize_t i;
+	size_t i;
 	for (i = 0; i < __min(source_size, destination_size) / 16; ++i)
 	{
 		__m128 tmp = _mm_loadu_ps((float*)src);
@@ -57,13 +59,13 @@ static void memcpy_aligned16_sse(void*       const destination,
 }
 
 static void memcpy_aligned8(void*       const destination,
-				 rsize_t     const destination_size,
+				 size_t     const destination_size,
 				 void const* const source,
-				 rsize_t     const source_size)
+				 size_t     const source_size)
 {
 	uint64_t* src = (uint64_t*) source;
 	uint64_t* dest = (uint64_t*) destination;
-	rsize_t i;
+	size_t i;
 	for (i = 0; i < __min(source_size, destination_size) / 8; ++i)
 	{
 		dest[i] = src[i];

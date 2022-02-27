@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 
 typedef struct
 {
@@ -9,7 +10,7 @@ typedef struct
 } bitarray;
 
 bitarray * bitarray_create(const uint64_t capacity, const bool oddonly);
-void __forceinline bitarray_set(bitarray * const b, const uint64_t i);
+void bitarray_set(bitarray * const b, const uint64_t i);
 void bitarray_unset(bitarray * const b, const uint64_t i);
 void bitarray_setval(bitarray * const b, const uint64_t i, const bool val);
 bool bitarray_get(bitarray * const b, const uint64_t i);

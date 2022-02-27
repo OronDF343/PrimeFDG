@@ -3,6 +3,7 @@
 #include <math.h>
 #include "pattern.h"
 #include "utils.h"
+#include "pfmath.h"
 
 bitarray* pfdg_init_bitarray(const uint64_t capacity, const uint64_t offset, const bool use_pattern)
 {
@@ -91,7 +92,7 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_
 {
 	// Step 1
 	bitarray* const known = pfdg_init_bitarray((uint64_t)sqrt((double)end) + 1, 0, true);
-	if (!known) return UINT64_MAX;
+	if (!known) return UINT32_MAX;
 	pfdg_sieve_seed(known, true);
 	/*FILE* k;
 	fopen_s(&k, "C:\\Users\\Oron\\k.2", "ab");
@@ -104,9 +105,8 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_
 	chunk_size = DIVUP(chunk_size, BITS(BITARRAY_WORD) * 2) * BITS(BITARRAY_WORD) * 2;
 
 	// Prepare file: Write the header
-	FILE * f;
-	const int err = fopen_s(&f, file, "w+b");
-	if (err == 0)
+	FILE * f = fopen(file, "w+b");
+	if (!f)
 	{
 		pfdg_file_header h = PFDG_HEADER_INITIALIZER;
 		h.data_length = DIVUP(len, BITS(BITARRAY_WORD) * 2) * sizeof(BITARRAY_WORD);
@@ -182,18 +182,17 @@ bool pfdg_generate_pattern(const uint64_t last_prime, const char * const file)
 	pfdg_sieve(arr, known, 0, false);
 	bitarray_delete(known);
 
-	FILE * f;
-	fopen_s(&f, file, "w+");
+	FILE * f = fopen(file, "w+");
 	uint64_t next_prime = last_prime + 2;
 	for (; next_prime < arr->capacity; next_prime += 2)
 		if (!bitarray_get(arr, next_prime))
 			break;
-	fprintf_s(f, "#pragma once\n\n#include \"stdafx.h\"\n\n// The prime from which to start the sieveing loop\n#define PFDG_PATTERN_SKIP %llu\n// The length of the precomputed pattern\n#define PFDG_PATTERN_LENGTH %llu\n", next_prime, len);
+	fprintf(f, "#pragma once\n\n#include \"stdafx.h\"\n\n// The prime from which to start the sieveing loop\n#define PFDG_PATTERN_SKIP %llu\n// The length of the precomputed pattern\n#define PFDG_PATTERN_LENGTH %llu\n", next_prime, len);
 
-	fprintf_s(f, "// The prefix of the precomputed pattern\nstatic const BITARRAY_WORD pfdg_pattern_prefix = 0x%.16llX;\n// The precomputed pattern data\nstatic const __declspec(align(32)) BITARRAY_WORD pfdg_pattern[PFDG_PATTERN_LENGTH] =\n{\n", arr->data[0]);
+	fprintf(f, "// The prefix of the precomputed pattern\nstatic const BITARRAY_WORD pfdg_pattern_prefix = 0x%.16llX;\n// The precomputed pattern data\nstatic const ALIGN32 BITARRAY_WORD pfdg_pattern[PFDG_PATTERN_LENGTH] =\n{\n", arr->data[0]);
 	for (uint64_t i = 1; i < arr->actual_capacity / BITS(BITARRAY_WORD); ++i)
-		fprintf_s(f, "\t0x%.16llX,\n", arr->data[i]);
-	fprintf_s(f, "};\n");
+		fprintf(f, "\t0x%.16llX,\n", arr->data[i]);
+	fprintf(f, "};\n");
 	fclose(f);
 	bitarray_delete(arr);
 	return true;

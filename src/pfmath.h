@@ -10,7 +10,7 @@
 //	return (m + (m >> 4) & 0xF0F0F0F) * 0x1010101 >> 24;
 //}
 
-#define BITCOUNT_IMP(T, NAME) inline T NAME(const T n) \
+#define BITCOUNT_IMP(T, NAME) static inline T NAME(const T n) \
 { \
 	T v = n - ((n >> 1) & (T)~(T)0 / 3); \
 	v = (v & (T)~(T)0 / 15 * 3) + ((v >> 2) & (T)~(T)0 / 15 * 3); \

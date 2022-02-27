@@ -71,7 +71,7 @@ void fill_test_omp(const uint64_t test_size, const int threads)
 	for (i = 0; i < test_size / pattern_length / 8; ++i)
 	{
 		const uint64_t cp = (test_size - i * pattern_length) * sizeof(BITARRAY_WORD);
-		memcpy_s(mem1 + i * pattern_length, cp, pfdg_pattern, __min(cp, pattern_length * sizeof(BITARRAY_WORD)));
+		memcpy(mem1 + i * pattern_length, pfdg_pattern, __min(cp, pattern_length * sizeof(BITARRAY_WORD)));
 	}
 	printf("Built-in ");
 	pfdg_timestamp_get(&t_end);
@@ -140,7 +140,7 @@ int main(const int argc, const char** argv)
 			mem2 = malloc(test_size);
 			mem1[test_size/8 - 1] = check_value;
 			mem2[test_size/8 - 1] = 0;
-			memcpy_s(mem2, test_size, mem1, test_size);
+			memcpy(mem2, mem1, test_size);
 			printf("\nBuilt-in: ");
 			if (mem2[test_size/8 - 1] == check_value) printf("Success\n");
 			else printf("Failed\n");

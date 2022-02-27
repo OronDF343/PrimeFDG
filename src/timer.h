@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-#ifdef _WIN32_WINNT
+#ifdef _WIN32
 
 #include <Windows.h>
 
@@ -50,7 +50,7 @@ inline PFDG_TIMESTAMP pfdg_timestamp_diff(const PFDG_TIMESTAMP start, const PFDG
 
 inline uint64_t pfdg_timestamp_microseconds(const PFDG_TIMESTAMP ts)
 {
-	return ((cl2 - cl1) * 1000000Ui64) / CLOCKS_PER_SEC;
+	return (ts * 1000000ULL) / CLOCKS_PER_SEC;
 }
 
 #endif

@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "stdlib.h": "c",
+        "xmmintrin.h": "c",
+        "limits.h": "c",
+        "bitarray.h": "c",
+        "stdafx.h": "c",
+        "utils.h": "c"
+    }
+}
