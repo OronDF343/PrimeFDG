@@ -23,7 +23,7 @@
     <ProjectGuid>{5CDA2CB3-35DD-4C0D-B0E9-1AF02E49CF31}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>PrimeFDG</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -90,7 +90,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
-      <AdditionalOptions>-openmp:experimental %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-openmp:llvm -openmp:experimental %(AdditionalOptions)</AdditionalOptions>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
@@ -106,7 +106,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OpenMPSupport>true</OpenMPSupport>
-      <AdditionalOptions>-openmp:experimental %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-openmp:llvm -openmp:experimental %(AdditionalOptions)</AdditionalOptions>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
@@ -128,7 +128,7 @@
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <PrecompiledHeaderCompileAs>CompileAsC</PrecompiledHeaderCompileAs>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalOptions>-openmp:experimental %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-openmp:llvm -openmp:experimental %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,7 +151,7 @@
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <PrecompiledHeaderCompileAs>CompileAsC</PrecompiledHeaderCompileAs>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <AdditionalOptions>-openmp:experimental %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-openmp:llvm -openmp:experimental %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
