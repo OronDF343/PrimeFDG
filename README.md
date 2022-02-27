@@ -3,7 +3,12 @@ Find prime numbers using an optimized, multithreaded and segmented Sieve of Erat
 
 The successor to my previous related projects.
 
+# Build requirements
+Currently requires Visual Studio 2019 version 16.9 or newer. Building for Windows requires the Windows SDK, version 10 or newer.
+
 # Performance
+Update 2022-02-27: The testing below is somewhat outdated due to compiler changes (the OpenMP implementation has changed).
+
 Multithreaded scaling is not great due to the ordered I/O operations used for saving the results. This can be addressed in a future update by either preallocating the file (probably what I'll end up doing) OR writing to multiple files in parallel, but will only bring benefits for high-performance storage technology.
 
 The algorithm is optimized for both speed and memory usage, and is segmented, so performance is not the absolute best possible, but it is pretty fast.
