@@ -35,7 +35,7 @@ bitarray* pfdg_init_bitarray(const uint64_t capacity, const uint64_t offset, con
 		for (; i < len; i += PFDG_PATTERN_LENGTH)
 		{
 			const uint64_t cp = (len - i) * sizeof(BITARRAY_WORD);
-			memcpy_aligned8(arr->data + i, cp, pfdg_pattern, __min(cp, PFDG_PATTERN_LENGTH * sizeof(BITARRAY_WORD)));
+			memcpy_aligned8(arr->data + i, cp, pfdg_pattern, MIN(cp, PFDG_PATTERN_LENGTH * sizeof(BITARRAY_WORD)));
 		}
 	}
 	else

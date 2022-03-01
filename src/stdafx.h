@@ -45,18 +45,24 @@ typedef enum { false = 0, true = 1 } bool;
 
 #ifdef __GNUC__
 
-#define __forceinline __attribute__((always_inline))
+#define FINLINE __attribute__((always_inline))
 #define ALIGN32 __attribute__((aligned(32)))
-#define __min(a,b) (((a)<(b))?(a):(b))
-#define __max(a,b) (((a)>(b))?(a):(b))
-#define _aligned_malloc aligned_alloc
-#define _aligned_free free
-#define _atoi64 atoi
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define ALIGNED_MALLOC(size, alignment) (aligned_alloc((alignment), (size)))
+#define ALIGNED_FREE free
+#define ATOI64 atoi
 #define inline
 
 #else
 
+#define FINLINE __forceinline
 #define ALIGN32 __declspec(align(32))
+#define MIN __min
+#define MAX __max
+#define ALIGNED_MALLOC _aligned_malloc
+#define ALIGNED_FREE _aligned_free
+#define ATOI64 _atoi64
 #define _CRT_SECURE_NO_WARNINGS 1
 
 #endif
