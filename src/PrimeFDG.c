@@ -23,32 +23,32 @@ void fill_test_omp(const uint64_t test_size, const int threads)
 	PFDG_TIMESTAMP t_start, t_end;
 
 	pfdg_timestamp_get(&t_start);
-	uint64_t* mem1 = _aligned_malloc(test_size, 32);
+	uint64_t* mem1 = ALIGNED_MALLOC(test_size, 32);
 	// Fill the rest with the pattern
 #pragma omp parallel for
 	for (i = 0; i < test_size / pattern_length / 8; ++i)
 	{
 		const uint64_t cp = (test_size - i * pattern_length) * sizeof(BITARRAY_WORD);
-		memcpy_aligned32_avx(mem1 + i * pattern_length, cp, pfdg_pattern, __min(cp, pattern_length * sizeof(BITARRAY_WORD)));
+		memcpy_aligned32_avx(mem1 + i * pattern_length, cp, pfdg_pattern, MIN(cp, pattern_length * sizeof(BITARRAY_WORD)));
 	}
 	printf("AVX-256 ");
 	pfdg_timestamp_get(&t_end);
 	print_timestamp_diff(t_start, t_end);
-	_aligned_free(mem1);
+	ALIGNED_FREE(mem1);
 			
 	pfdg_timestamp_get(&t_start);
-	mem1 = _aligned_malloc(test_size, 16);
+	mem1 = ALIGNED_MALLOC(test_size, 16);
 	// Fill the rest with the pattern
 #pragma omp parallel for
 	for (i = 0; i < test_size / pattern_length / 8; ++i)
 	{
 		const uint64_t cp = (test_size - i * pattern_length) * sizeof(BITARRAY_WORD);
-		memcpy_aligned16_sse(mem1 + i * pattern_length, cp, pfdg_pattern, __min(cp, pattern_length * sizeof(BITARRAY_WORD)));
+		memcpy_aligned16_sse(mem1 + i * pattern_length, cp, pfdg_pattern, MIN(cp, pattern_length * sizeof(BITARRAY_WORD)));
 	}
 	printf("AVX/SSE-128 ");
 	pfdg_timestamp_get(&t_end);
 	print_timestamp_diff(t_start, t_end);
-	_aligned_free(mem1);
+	ALIGNED_FREE(mem1);
 			
 	pfdg_timestamp_get(&t_start);
 	mem1 = malloc(test_size);
@@ -57,7 +57,7 @@ void fill_test_omp(const uint64_t test_size, const int threads)
 	for (i = 0; i < test_size / pattern_length / 8; ++i)
 	{
 		const uint64_t cp = (test_size - i * pattern_length) * sizeof(BITARRAY_WORD);
-		memcpy_aligned8(mem1 + i * pattern_length, cp, pfdg_pattern, __min(cp, pattern_length * sizeof(BITARRAY_WORD)));
+		memcpy_aligned8(mem1 + i * pattern_length, cp, pfdg_pattern, MIN(cp, pattern_length * sizeof(BITARRAY_WORD)));
 	}
 	printf("64-bit ");
 	pfdg_timestamp_get(&t_end);
@@ -71,7 +71,7 @@ void fill_test_omp(const uint64_t test_size, const int threads)
 	for (i = 0; i < test_size / pattern_length / 8; ++i)
 	{
 		const uint64_t cp = (test_size - i * pattern_length) * sizeof(BITARRAY_WORD);
-		memcpy_s(mem1 + i * pattern_length, cp, pfdg_pattern, __min(cp, pattern_length * sizeof(BITARRAY_WORD)));
+		memcpy(mem1 + i * pattern_length, pfdg_pattern, MIN(cp, pattern_length * sizeof(BITARRAY_WORD)));
 	}
 	printf("Built-in ");
 	pfdg_timestamp_get(&t_end);
@@ -94,8 +94,8 @@ int main(const int argc, const char** argv)
 			printf("Sequential copy %llu MiB test:\n", test_size / 1048576);
 
 			pfdg_timestamp_get(&t_start);
-			uint64_t* mem1 = _aligned_malloc(test_size, 32);
-			uint64_t* mem2 = _aligned_malloc(test_size, 32);
+			uint64_t* mem1 = ALIGNED_MALLOC(test_size, 32);
+			uint64_t* mem2 = ALIGNED_MALLOC(test_size, 32);
 			mem1[test_size/8 - 1] = check_value;
 			mem2[test_size/8 - 1] = 0;
 			memcpy_aligned32_avx(mem2, test_size, mem1, test_size);
@@ -104,12 +104,12 @@ int main(const int argc, const char** argv)
 			else printf("Failed\n");
 			pfdg_timestamp_get(&t_end);
 			print_timestamp_diff(t_start, t_end);
-			_aligned_free(mem1);
-			_aligned_free(mem2);
+			ALIGNED_FREE(mem1);
+			ALIGNED_FREE(mem2);
 
 			pfdg_timestamp_get(&t_start);
-			mem1 = _aligned_malloc(test_size, 16);
-			mem2 = _aligned_malloc(test_size, 16);
+			mem1 = ALIGNED_MALLOC(test_size, 16);
+			mem2 = ALIGNED_MALLOC(test_size, 16);
 			mem1[test_size/8 - 1] = check_value;
 			mem2[test_size/8 - 1] = 0;
 			memcpy_aligned16_sse(mem2, test_size, mem1, test_size);
@@ -118,8 +118,8 @@ int main(const int argc, const char** argv)
 			else printf("Failed\n");
 			pfdg_timestamp_get(&t_end);
 			print_timestamp_diff(t_start, t_end);
-			_aligned_free(mem1);
-			_aligned_free(mem2);
+			ALIGNED_FREE(mem1);
+			ALIGNED_FREE(mem2);
 			
 			pfdg_timestamp_get(&t_start);
 			mem1 = malloc(test_size);
@@ -140,7 +140,7 @@ int main(const int argc, const char** argv)
 			mem2 = malloc(test_size);
 			mem1[test_size/8 - 1] = check_value;
 			mem2[test_size/8 - 1] = 0;
-			memcpy_s(mem2, test_size, mem1, test_size);
+			memcpy(mem2, mem1, test_size);
 			printf("\nBuilt-in: ");
 			if (mem2[test_size/8 - 1] == check_value) printf("Success\n");
 			else printf("Failed\n");
@@ -161,10 +161,10 @@ int main(const int argc, const char** argv)
 	}
 
 	// Parse args
-	const uint64_t start = _atoi64(argv[1]);
-	const uint64_t end = _atoi64(argv[2]);
+	const uint64_t start = ATOI64(argv[1]);
+	const uint64_t end = ATOI64(argv[2]);
 	const int num_threads = atoi(argv[3]);
-	const uint64_t chunks = argc == 5 ? num_threads : _atoi64(argv[4]);
+	const uint64_t chunks = argc == 5 ? num_threads : ATOI64(argv[4]);
 	const char* file = argv[argc == 5 ? 4 : 5];
 
 	pfdg_timestamp_init();
