@@ -16,6 +16,11 @@ cd PrimeFDG
 cmake . -DCMAKE_BUILD_TYPE:STRING=Release
 make
 ```
+
+It is also possible to use VSCode with the following extension packs:
+* C/C++ Extension Pack
+* CMake Tools
+
 ### On Windows (MSVC)
 Prerequisites:
 * Visual Studio 2019 version 16.9 or newer
