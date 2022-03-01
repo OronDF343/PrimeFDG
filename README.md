@@ -3,10 +3,27 @@ Find prime numbers using an optimized, multithreaded and segmented Sieve of Erat
 
 The successor to my previous related projects.
 
-# Build requirements
-Currently requires Visual Studio 2019 version 16.9 or newer. Building for Windows requires the Windows SDK, version 10 or newer.
+## Building
+### On Linux (CMake + GCC)
+Prerequisites (on Debian):
+```
+sudo apt install git build-essential cmake
+```
+Compiling release build:
+```
+git pull https://github.com/OronDF343/PrimeFDG.git
+cd PrimeFDG
+cmake . -DCMAKE_BUILD_TYPE:STRING=Release
+make
+```
+### On Windows (MSVC)
+Prerequisites:
+* Visual Studio 2019 version 16.9 or newer
+* Desktop C++ workload
+* MSVC v142 toolchain
+* Windows SDK version 10
 
-# Performance
+## Performance
 Update 2022-02-27: The testing below is somewhat outdated due to compiler changes (the OpenMP implementation has changed).
 
 Multithreaded scaling is not great due to the ordered I/O operations used for saving the results. This can be addressed in a future update by either preallocating the file (probably what I'll end up doing) OR writing to multiple files in parallel, but will only bring benefits for high-performance storage technology.
