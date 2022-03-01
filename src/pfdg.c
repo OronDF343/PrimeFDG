@@ -66,10 +66,8 @@ void pfdg_mark(bitarray* const arr, const uint64_t prime, const uint64_t offset)
 		bitarray_set(arr, i * prime - offset);*/
 	// Janky OpenMP SIMD implementation: (sometimes has ~10% performance improvement)
 	// ReSharper disable twice CppJoinDeclarationAndAssignment
-	uint64_t j;
-#if _MSC_VER >= 1920 
+	uint64_t j; 
 #pragma omp simd
-#endif
 	for (j = i / 2; j < (uint64_t)ceil(((double)(arr->capacity + offset) / (double) prime - 1) / 2.0); j++)
 		bitarray_set(arr, (j * 2 + 1) * prime - offset);
 }
