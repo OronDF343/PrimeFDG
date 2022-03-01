@@ -5,6 +5,7 @@
         "limits.h": "c",
         "bitarray.h": "c",
         "stdafx.h": "c",
-        "utils.h": "c"
+        "utils.h": "c",
+        "time.h": "c"
     }
 }

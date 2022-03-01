@@ -34,23 +34,35 @@ inline uint64_t pfdg_timestamp_microseconds(const PFDG_TIMESTAMP ts)
 #else
 #include <time.h>
 
-#define PFDG_TIMESTAMP clock_t
+#define PFDG_TIMESTAMP struct timespec
 
-inline void pfdg_timestamp_init() { }
+PFDG_TIMESTAMP freq;
+
+inline void pfdg_timestamp_init()
+{
+	int err = clock_getres(CLOCK_MONOTONIC_RAW, &freq);
+	if (err != 0)
+		printf("clock error");
+}
 
 inline void pfdg_timestamp_get(PFDG_TIMESTAMP* ts)
 {
-	*ts = clock();
+	int err = clock_gettime(CLOCK_MONOTONIC_RAW, ts);
+	if (err != 0)
+		printf("clock error");
 }
 
 inline PFDG_TIMESTAMP pfdg_timestamp_diff(const PFDG_TIMESTAMP start, const PFDG_TIMESTAMP end)
 {
-	return end - start;
+	PFDG_TIMESTAMP res;
+	res.tv_sec = end.tv_sec - start.tv_sec;
+	res.tv_nsec = end.tv_nsec - start.tv_nsec;
+	return res;
 }
 
 inline uint64_t pfdg_timestamp_microseconds(const PFDG_TIMESTAMP ts)
 {
-	return (ts * 1000000ULL) / CLOCKS_PER_SEC;
+	return ((ts.tv_sec * 1000000000ULL) + ts.tv_nsec) / 1000ULL;
 }
 
 #endif

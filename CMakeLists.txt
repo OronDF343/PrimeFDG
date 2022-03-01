@@ -7,7 +7,6 @@ enable_testing()
 add_compile_options(-march=sandybridge)
 add_compile_options(-mtune=znver1)
 add_compile_options(-fopenmp)
-add_compile_options(-std=c11)
 
 add_executable(PrimeFDG
     src/bitarray.c
