@@ -92,6 +92,7 @@
       <OpenMPSupport>true</OpenMPSupport>
       <AdditionalOptions>-openmp:llvm -openmp:experimental %(AdditionalOptions)</AdditionalOptions>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -108,6 +109,7 @@
       <OpenMPSupport>true</OpenMPSupport>
       <AdditionalOptions>-openmp:llvm -openmp:experimental %(AdditionalOptions)</AdditionalOptions>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,6 +131,7 @@
       <PrecompiledHeaderCompileAs>CompileAsC</PrecompiledHeaderCompileAs>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <AdditionalOptions>-openmp:llvm -openmp:experimental %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -152,6 +155,7 @@
       <PrecompiledHeaderCompileAs>CompileAsC</PrecompiledHeaderCompileAs>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <AdditionalOptions>-openmp:llvm -openmp:experimental %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -163,6 +167,8 @@
   <ItemGroup>
     <ClInclude Include="bitarray.h" />
     <ClInclude Include="cpuid.h" />
+    <ClInclude Include="io.h" />
+    <ClInclude Include="threads.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="options.h" />
     <ClInclude Include="pattern.h" />
@@ -175,6 +181,7 @@
   <ItemGroup>
     <ClCompile Include="bitarray.c" />
     <ClCompile Include="cpuid.c" />
+    <ClCompile Include="io.c" />
     <ClCompile Include="pfdg.c" />
     <ClCompile Include="PrimeFDG.c" />
     <ClCompile Include="stdafx.c">
