@@ -4,6 +4,8 @@
 #include "pattern.h"
 #include "utils.h"
 #include "pfmath.h"
+#include "io.h"
+#include "timer.h"
 
 bitarray* pfdg_init_bitarray(const uint64_t capacity, const uint64_t offset, const bool use_pattern)
 {
@@ -113,6 +115,11 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_
 		fwrite(&h, sizeof(pfdg_file_header), 1, f);
 	}
 
+	io_init(f, chunks);
+
+	PFDG_TIMESTAMP t_start, t_end;
+	pfdg_timestamp_get(&t_start);
+
 	// Step 2
 	// Run loop in parallel, but must be ORDERED when saving files!
 	bool abort = false;
@@ -146,12 +153,19 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_
 			// Write chunks to file in order!
 #pragma omp ordered
 			{
-				bitarray_serialize_to_file(arr, f);
+				io_enqueue(arr);
+				//bitarray_serialize_to_file(arr, f);
 			}
 			// Free up the memory
-			bitarray_delete(arr);
+			//bitarray_delete(arr);
 		}
 	}
+
+	pfdg_timestamp_get(&t_end);
+	const PFDG_TIMESTAMP diff = pfdg_timestamp_diff(t_start, t_end);
+	printf("Time: %f seconds\n", pfdg_timestamp_microseconds(diff) / 1000000.0);
+
+	io_end();
 
 	// Handle abortion
 	if (abort) return false;
