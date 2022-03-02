@@ -82,7 +82,7 @@ void fill_test_omp(const uint64_t test_size, const int threads)
 int main(const int argc, const char** argv)
 {
 	cpuid_init();
-	if (argc < 5)
+	if (argc < 4)
 	{
 		if (argc == 2 && strcmp(argv[1], "test") == 0)
 		{
@@ -156,16 +156,27 @@ int main(const int argc, const char** argv)
 			
 			return 0;
 		}
-		printf("PrimeFDG\nCopyright (c) 2018 by Oron Feinerman\n\nUsage: primefdg <start> <end> <num_threads> [<chunks>] <file>\n");
+		printf("PrimeFDG\nCopyright (c) 2022 by Oron Feinerman\n\nUsage: primefdg <start> <end> <num_threads>[:<chunks>] [<file>]\ndefault chunks = num_threads * 1024\n");
 		return 0;
 	}
 
 	// Parse args
 	const uint64_t start = ATOI64(argv[1]);
 	const uint64_t end = ATOI64(argv[2]);
-	const int num_threads = atoi(argv[3]);
-	const uint64_t chunks = argc == 5 ? num_threads : ATOI64(argv[4]);
-	const char* file = argv[argc == 5 ? 4 : 5];
+
+	char* num_str = argv[3];
+	char* threads_str = num_str;
+	char* chunks_str = NULL;
+	char* colon = strchr(num_str, ':');
+	if (colon)
+	{
+		*colon = '\0';
+		chunks_str = colon + 1;
+	}
+
+	const int num_threads = atoi(threads_str);
+	const uint64_t chunks = chunks_str == NULL ? num_threads * 1024 : ATOI64(chunks_str);
+	const char* file = argc < 5 ? NULL : argv[4];
 
 	pfdg_timestamp_init();
 	omp_set_num_threads(num_threads);
