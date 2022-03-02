@@ -147,26 +147,29 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_
 				abort = true;
 #pragma omp flush (abort)
 			}
-			// Sieve it!
-			pfdg_sieve(arr, known, offset, true);
-			// Count the primes
-			const uint64_t count = bitarray_count(arr, false);
-			// Increment counter atomically to prevent race conditions
-#pragma omp atomic
-			*prime_count += count;
-			if (f != NULL)
-			{
-				// Write chunks to file in order!
-#pragma omp ordered
-				{
-					io_enqueue(arr);
-					//bitarray_serialize_to_file(arr, f);
-				}
-			}
 			else
 			{
-				// Free up the memory
-				bitarray_delete(arr);
+				// Sieve it!
+				pfdg_sieve(arr, known, offset, true);
+				// Count the primes
+				const uint64_t count = bitarray_count(arr, false);
+				// Increment counter atomically to prevent race conditions
+#pragma omp atomic
+				* prime_count += count;
+				if (f != NULL)
+				{
+					// Write chunks to file in order!
+#pragma omp ordered
+					{
+						io_enqueue(arr);
+						//bitarray_serialize_to_file(arr, f);
+					}
+				}
+				else
+				{
+					// Free up the memory
+					bitarray_delete(arr);
+				}
 			}
 		}
 	}

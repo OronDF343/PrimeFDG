@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "pattern.h"
 #include "cpuid.h"
+#include <math.h>
 
 void print_timestamp_diff(const PFDG_TIMESTAMP t_start, const PFDG_TIMESTAMP t_end)
 {
@@ -156,7 +157,7 @@ int main(const int argc, const char** argv)
 			
 			return 0;
 		}
-		printf("PrimeFDG\nCopyright (c) 2022 by Oron Feinerman\n\nUsage: primefdg <start> <end> <num_threads>[:<chunks>] [<file>]\ndefault chunks = num_threads * 1024\n");
+		printf("PrimeFDG\nCopyright (c) 2022 by Oron Feinerman\n\nUsage: primefdg <start> <end> <num_threads>[:<chunks>] [<file>]\ndefault chunks = num_threads * 2^floor(log10(end))\n");
 		return 0;
 	}
 
@@ -175,8 +176,10 @@ int main(const int argc, const char** argv)
 	}
 
 	const int num_threads = atoi(threads_str);
-	const uint64_t chunks = chunks_str == NULL ? num_threads * 1024 : ATOI64(chunks_str);
+	const uint64_t chunks = chunks_str == NULL ? (uint64_t)num_threads << (uint64_t)log10(end) : ATOI64(chunks_str);
 	const char* file = argc < 5 ? NULL : argv[4];
+
+	printf("Using %i threads, %llu chunks\n", num_threads, chunks);
 
 	pfdg_timestamp_init();
 	omp_set_num_threads(num_threads);
