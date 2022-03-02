@@ -11,6 +11,7 @@ add_compile_options(-fopenmp)
 add_executable(PrimeFDG
     src/bitarray.c
     src/cpuid.c
+    src/io.c
     src/pfdg.c
     src/PrimeFDG.c
     src/stdafx.c
