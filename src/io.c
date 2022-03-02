@@ -53,7 +53,7 @@ void io_init(FILE* file, const uint64_t queue_length)
 void io_enqueue(bitarray* source)
 {
 	// TODO: Mutex lock start
-	while (thread_arg->count < thread_arg->size)
+	while (thread_arg->count >= thread_arg->size)
 	{
 		// TODO: Wait for available slot correctly
 		thrd_yield();
