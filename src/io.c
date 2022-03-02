@@ -20,8 +20,8 @@ int io_proc(io_queue_t* queue)
 		if (queue->count > 0)
 		{
 			// TODO: Mutex2 lock start
-			bitarray* item = queue->data[(queue->start + queue->count) % queue->size];
-			queue->start = (queue->start + 1) % queue->count;
+			bitarray* item = queue->data[queue->start];
+			queue->start = (queue->start + 1) % queue->size;
 			queue->count--;
 			// TODO: Mutex2 lock end
 			bitarray_serialize_to_file(item, queue->file);
@@ -31,7 +31,7 @@ int io_proc(io_queue_t* queue)
 		{
 			// TODO: Wait for available data correctly
 			thrd_yield();
-			struct timespec duration = { .tv_sec = 1 };
+			struct timespec duration = { .tv_sec = 0, .tv_nsec = 10000000 }; // 10ms
 			thrd_sleep(&duration, NULL);
 		}
 	}
@@ -57,7 +57,7 @@ void io_enqueue(bitarray* source)
 	{
 		// TODO: Wait for available slot correctly
 		thrd_yield();
-		struct timespec duration = { .tv_sec = 1 };
+		struct timespec duration = { .tv_sec = 0, .tv_nsec = 10000000 }; // 10ms
 		thrd_sleep(&duration, NULL);
 	}
 	// TODO: Mutex2 lock start
