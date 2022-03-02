@@ -104,18 +104,22 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_
 	uint64_t chunk_size = DIVUP(len, chunks);
 	chunk_size = DIVUP(chunk_size, BITS(BITARRAY_WORD) * 2) * BITS(BITARRAY_WORD) * 2;
 
-	// Prepare file: Write the header
-	FILE * f = fopen(file, "w+b");
-	if (!f)
+	FILE* f = NULL;
+	if (file != NULL)
 	{
-		pfdg_file_header h = PFDG_HEADER_INITIALIZER;
-		h.data_length = DIVUP(len, BITS(BITARRAY_WORD) * 2) * sizeof(BITARRAY_WORD);
-		h.number_first = start;
-		h.number_last = end;
-		fwrite(&h, sizeof(pfdg_file_header), 1, f);
-	}
+		// Prepare file: Write the header
+		f = fopen(file, "w+b");
+		if (!f)
+		{
+			pfdg_file_header h = PFDG_HEADER_INITIALIZER;
+			h.data_length = DIVUP(len, BITS(BITARRAY_WORD) * 2) * sizeof(BITARRAY_WORD);
+			h.number_first = start;
+			h.number_last = end;
+			fwrite(&h, sizeof(pfdg_file_header), 1, f);
+		}
 
-	io_init(f, chunks);
+		io_init(f, chunks);
+	}
 
 	PFDG_TIMESTAMP t_start, t_end;
 	pfdg_timestamp_get(&t_start);
@@ -150,14 +154,20 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_
 			// Increment counter atomically to prevent race conditions
 #pragma omp atomic
 			*prime_count += count;
-			// Write chunks to file in order!
-#pragma omp ordered
+			if (f != NULL)
 			{
-				io_enqueue(arr);
-				//bitarray_serialize_to_file(arr, f);
+				// Write chunks to file in order!
+#pragma omp ordered
+				{
+					io_enqueue(arr);
+					//bitarray_serialize_to_file(arr, f);
+				}
 			}
-			// Free up the memory
-			//bitarray_delete(arr);
+			else
+			{
+				// Free up the memory
+				bitarray_delete(arr);
+			}
 		}
 	}
 
@@ -165,16 +175,20 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_
 	const PFDG_TIMESTAMP diff = pfdg_timestamp_diff(t_start, t_end);
 	printf("Time: %f seconds\n", pfdg_timestamp_microseconds(diff) / 1000000.0);
 
-	io_end();
+	if (f != NULL)
+		io_end();
 
 	// Handle abortion
 	if (abort) return false;
 
-	// Write number of primes found
-	fseek(f, 40, SEEK_SET);
-	fwrite(prime_count, sizeof(uint64_t), 1, f);
-	// Close file
-	fclose(f);
+	if (f != NULL)
+	{
+		// Write number of primes found
+		fseek(f, 40, SEEK_SET);
+		fwrite(prime_count, sizeof(uint64_t), 1, f);
+		// Close file
+		fclose(f);
+	}
 	return true;
 }
 
