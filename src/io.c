@@ -15,7 +15,7 @@ io_queue_t* thread_arg;
 
 int io_proc(io_queue_t* queue)
 {
-	while (queue->done != true)
+	while (queue->done != true || queue->count > 0)
 	{
 		if (queue->count > 0)
 		{
