@@ -4,10 +4,10 @@
 
 thrd_t thread;
 typedef struct {
-	int size;
+	uint64_t size;
 	bitarray** data;
-	int start;
-	int count;
+	uint64_t start;
+	uint64_t count;
 	bool done;
 	FILE* file;
 } io_queue_t;
@@ -38,7 +38,7 @@ int io_proc(io_queue_t* queue)
 	return 0;
 }
 
-void io_init(FILE* file, const int queue_length)
+void io_init(FILE* file, const uint64_t queue_length)
 {
 	thread_arg = malloc(sizeof(io_queue_t));
 	thread_arg->size = queue_length;
