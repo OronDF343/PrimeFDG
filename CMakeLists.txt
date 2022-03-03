@@ -18,6 +18,7 @@ add_executable(PrimeFDG
 )
 target_link_libraries(PrimeFDG PRIVATE m)
 target_link_libraries(PrimeFDG PRIVATE gomp)
+target_link_libraries(PrimeFDG PRIVATE pthread)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

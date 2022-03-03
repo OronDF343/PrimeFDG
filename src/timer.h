@@ -32,8 +32,6 @@ inline uint64_t pfdg_timestamp_microseconds(const PFDG_TIMESTAMP ts)
 }
 
 #else
-#include <time.h>
-
 #define PFDG_TIMESTAMP struct timespec
 
 PFDG_TIMESTAMP freq;
