@@ -29,9 +29,10 @@ bitarray* pfdg_init_bitarray(const uint64_t capacity, const uint64_t offset, con
 		const uint64_t align = (offset / BITS(BITARRAY_WORD) / 2 - 1 + i) % PFDG_PATTERN_LENGTH;
 		if (align > 0)
 		{
-			const uint64_t cp = (PFDG_PATTERN_LENGTH - align) * sizeof(BITARRAY_WORD);
+			const uint64_t words = MIN(len, (PFDG_PATTERN_LENGTH - align));
+			const uint64_t cp = words * sizeof(BITARRAY_WORD);
 			memcpy_aligned8(arr->data, cp, pfdg_pattern + align, cp);
-			i += PFDG_PATTERN_LENGTH - align;
+			i += words;
 		}
 		// Fill the rest with the pattern
 		for (; i < len; i += PFDG_PATTERN_LENGTH)
