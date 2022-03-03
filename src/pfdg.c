@@ -5,7 +5,7 @@
 #include "utils.h"
 #include "pfmath.h"
 #include "io.h"
-#include "timer.h"
+//#include "timer.h"
 
 bitarray* pfdg_init_bitarray(const uint64_t capacity, const uint64_t offset, const bool use_pattern)
 {
@@ -119,11 +119,11 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chun
 			fwrite(&h, sizeof(pfdg_file_header), 1, f);
 		}
 
-		io_init(f, chunks);
+		//io_init(f, chunks);
 	}
 
-	PFDG_TIMESTAMP t_start, t_end;
-	pfdg_timestamp_get(&t_start);
+	//PFDG_TIMESTAMP t_start, t_end;
+	//pfdg_timestamp_get(&t_start);
 
 	// Step 2
 	// Run loop in parallel, but must be ORDERED when saving files!
@@ -156,15 +156,16 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chun
 				const uint64_t count = bitarray_count(arr, false);
 				// Increment counter atomically to prevent race conditions
 #pragma omp atomic
-				* prime_count += count;
+				*prime_count += count;
 				if (f != NULL)
 				{
 					// Write chunks to file in order!
 #pragma omp ordered
 					{
-						io_enqueue(arr);
-						//bitarray_serialize_to_file(arr, f);
+						//io_enqueue(arr);
+						bitarray_serialize_to_file(arr, f);
 					}
+					bitarray_delete(arr);
 				}
 				else
 				{
@@ -175,12 +176,11 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chun
 		}
 	}
 
-	pfdg_timestamp_get(&t_end);
-	const PFDG_TIMESTAMP diff = pfdg_timestamp_diff(t_start, t_end);
-	printf("Time: %f seconds\n", pfdg_timestamp_microseconds(diff) / 1000000.0);
+	//pfdg_timestamp_get(&t_end);
+	//const PFDG_TIMESTAMP diff = pfdg_timestamp_diff(t_start, t_end);
+	//printf("Time: %f seconds\n", pfdg_timestamp_microseconds(diff) / 1000000.0);
 
-	if (f != NULL)
-		io_end();
+	//if (f != NULL) io_end();
 
 	// Handle abortion
 	if (abort) return false;
