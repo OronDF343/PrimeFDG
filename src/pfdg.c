@@ -88,7 +88,7 @@ void pfdg_sieve(bitarray* const arr, bitarray* const known, const uint64_t offse
 			pfdg_mark(arr, i, offset);
 }
 
-bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_t chunks, const char * const file, uint64_t * const prime_count)
+bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chunks, const char * const file, uint64_t * const prime_count)
 {
 	// Step 1
 	bitarray* const known = pfdg_init_bitarray((uint64_t)sqrt((double)end) + 1, 0, true);
@@ -103,6 +103,7 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, const uint64_
 	*prime_count = 0;
 	uint64_t chunk_size = DIVUP(len, chunks);
 	chunk_size = DIVUP(chunk_size, BITS(BITARRAY_WORD) * 2) * BITS(BITARRAY_WORD) * 2;
+	chunks = DIVUP(len, chunk_size);
 
 	FILE* f = NULL;
 	if (file != NULL)
