@@ -157,7 +157,7 @@ int main(const int argc, const char** argv)
 			
 			return 0;
 		}
-		printf("PrimeFDG\nCopyright (c) 2022 by Oron Feinerman\n\nUsage: primefdg <start> <end> <num_threads>[:<chunks>] [<file>]\ndefault chunks = num_threads * 2^floor(log10(end))\n");
+		printf("PrimeFDG\nCopyright (c) 2022 by Oron Feinerman\n\nUsage: primefdg <start> <end> <num_threads>[:<chunks>] [<file>]\ndefault chunks = num_threads * 2^MAX(floor(log10(end)) - 1, 0)\n");
 		return 0;
 	}
 
@@ -176,7 +176,9 @@ int main(const int argc, const char** argv)
 	}
 
 	const int num_threads = atoi(threads_str);
-	const uint64_t chunks = chunks_str == NULL ? (uint64_t)num_threads << (uint64_t)log10(end) : ATOI64(chunks_str);
+	uint64_t l = (uint64_t)log10(end);
+	if (l > 0) l--;
+	const uint64_t chunks = chunks_str == NULL ? (uint64_t)num_threads << l : ATOI64(chunks_str);
 	const char* file = argc < 5 ? NULL : argv[4];
 
 	printf("Using %i threads, %llu chunks\n", num_threads, chunks);
