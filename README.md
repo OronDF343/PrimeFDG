@@ -29,27 +29,20 @@ Prerequisites:
 * Windows SDK version 10
 
 ## Performance
-Update 2022-02-27: The testing below is somewhat outdated due to compiler changes (the OpenMP implementation has changed).
 
-Multithreaded scaling is not great due to the ordered I/O operations used for saving the results. This can be addressed in a future update by either preallocating the file (probably what I'll end up doing) OR writing to multiple files in parallel, but will only bring benefits for high-performance storage technology.
+Testing performed 2022-03-04:
+* CPU: AMD Ryzen 9 3900X (12 cores, 24 threads)
+* RAM: 64GB (4x16) DDR4 @ 3733MHz CL16 with tweaked subtimings
+* OS: Windows 10 x64 20H2
+* The results were not saved to file, in order to measure pure calculation performance
+* Command line: `PrimeFDG.exe 1 <range> <threads>`
+* Results are based on a very small number of runs (1 <= N <= 10)
 
-The algorithm is optimized for both speed and memory usage, and is segmented, so performance is not the absolute best possible, but it is pretty fast.
+Results: (time in seconds)
 
-Testing performed 26-09-2018 on the following hardware:
-* CPU: AMD Ryzen 7 1700 @ 3.8GHz (8 cores, 16 threads)
-* RAM: 2x16GB Hynix dual-rank DDR4 memory @ 2933MHz CL14 with tweaked subtimings
-* Target volume 1: ImDisk Toolkit 20161231 RAM Disk, AWE physical memory (no dynamic allocation), 1GiB NTFS
-
-In the future I'll test the following volumes as well: (expect slower results / worse scaling)
-* Target volume 2: Samsung 960 EVO 500GB NVMe TLC SSD, NTFS partition #2 (shared with system volume)
-* Target volume 3: Micron 1100 2048TB TLC SSD, exFAT
-* Target volume 4: Western Digital Red 4TB HDD, NTFS
-
-Results: (time in seconds, average of 4 runs, Gp = billion primes)
-
-Test | 1 thread | 2 threads | 4 threads | 8 threads | 16 threads
---- | --- | --- | --- | --- | ---
-1Gp Vol.1 | 3.605 | 2.2877 | 1.562 | 1.2344 | 0.7560
-10Gp Vol.1 | 43.939 | 28.131 | 18.266 | 15.503 | 15.244
-
-NOTE: The latest version, if compiled with Visual Studio 2019 Preview 2.0, may yield up to 10% better performance in some cases
+Range | Primes found | 1 thread | 2 threads | 4 threads | 8 threads | 16 threads | 24 threads | Peak memory usage
+--- | --- | --- | --- | --- | --- | --- | --- | ---
+10^9 | 50847533 | \~0.61 | \~0.32 | \~0.19 | \~0.12 | \~0.09 | \~0.08 | <1 MB
+10^10 | 455052410 | 7.85 | 3.71 | 1.84 | 1.15 | 1.02 | 0.85 | 2 MB
+10^11 | 4118054812 | 88.42 | 44.92 | 23.05 | 12.24 | 10.28 | 7.86 | 7 MB
+10^12 | 37607912017 | 3500.51 | 1947.48 | 584.79 | 139.84 | 111.67 | 88.43 | 31 MB
