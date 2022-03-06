@@ -37,12 +37,13 @@ Testing performed 2022-03-04:
 * The results were not saved to file, in order to measure pure calculation performance
 * Command line: `PrimeFDG.exe 1 <range> <threads>`
 * Results are based on a very small number of runs (1 <= N <= 10)
+* Number of primes does not include the prime `2`
 
 Results: (time in seconds)
 
 Range | Primes found | 1 thread | 2 threads | 4 threads | 8 threads | 16 threads | 24 threads | Peak memory usage
 --- | --- | --- | --- | --- | --- | --- | --- | ---
 10^9 | 50847533 | \~0.61 | \~0.32 | \~0.19 | \~0.12 | \~0.09 | \~0.08 | <1 MB
-10^10 | 455052410 | 7.85 | 3.71 | 1.84 | 1.15 | 1.02 | 0.85 | 2 MB
+10^10 | 455052510 | 7.85 | 3.71 | 1.84 | 1.15 | 1.02 | 0.85 | 2 MB
 10^11 | 4118054812 | 88.42 | 44.92 | 23.05 | 12.24 | 10.28 | 7.86 | 7 MB
 10^12 | 37607912017 | 3500.51 | 1947.48 | 584.79 | 139.84 | 111.67 | 88.43 | 31 MB
