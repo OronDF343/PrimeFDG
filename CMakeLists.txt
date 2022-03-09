@@ -12,6 +12,8 @@ add_executable(PrimeFDG
     src/bitarray.c
     src/cpuid.c
     src/io.c
+    src/pevents.cpp
+    src/pevents_c.cpp
     src/pfdg.c
     src/PrimeFDG.c
     src/stdafx.c
