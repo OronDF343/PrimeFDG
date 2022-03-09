@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "io.h"
 #include "threads.h"
+#include "pevents_c.h"
 
 thrd_t thread;
 typedef struct {
@@ -13,8 +14,9 @@ typedef struct {
 } io_queue_t;
 io_queue_t* thread_arg;
 
-int io_proc(io_queue_t* queue)
+int io_proc(void* queue_v)
 {
+	io_queue_t* queue = queue_v;
 	while (queue->done != true || queue->count > 0)
 	{
 		if (queue->count > 0)
