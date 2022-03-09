@@ -7,7 +7,7 @@ thrd_t thread;
 pevent_t event_data_available;
 pevent_t event_data_freed;
 mtx_t mutex_data;
-mtx_t mutex_enqueue;
+//mtx_t mutex_enqueue;
 typedef struct {
 	uint64_t size;
 	bitarray** data;
@@ -60,12 +60,12 @@ void io_init(FILE* file, const uint64_t queue_length)
 	event_data_freed = pevent_create(false, false);
 
 	mtx_init(&mutex_data, mtx_plain);
-	mtx_init(&mutex_enqueue, mtx_plain);
+	//mtx_init(&mutex_enqueue, mtx_plain);
 }
 
 void io_enqueue(bitarray* source)
 {
-	mtx_lock(&mutex_enqueue);
+	//mtx_lock(&mutex_enqueue);
 	while (thread_arg->count >= thread_arg->size)
 	{
 		// Wait for available slot
@@ -77,7 +77,7 @@ void io_enqueue(bitarray* source)
 	thread_arg->count++;
 	mtx_unlock(&mutex_data);
 	pevent_set(event_data_available);
-	mtx_unlock(&mutex_enqueue);
+	//mtx_unlock(&mutex_enqueue);
 }
 
 void io_end()
@@ -91,5 +91,5 @@ void io_end()
 	pevent_destroy(event_data_available);
 	pevent_destroy(event_data_freed);
 	mtx_destroy(&mutex_data);
-	mtx_destroy(&mutex_enqueue);
+	//mtx_destroy(&mutex_enqueue);
 }
