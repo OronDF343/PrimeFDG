@@ -74,6 +74,27 @@ int thrd_join(thrd_t thr, int* res)
     return thrd_success;
 }
 
+
+enum {
+    mtx_plain = 0,
+    mtx_recursive = 1,
+    mtx_timed = 2
+};
+
+typedef HANDLE mtx_t;
+
+int mtx_init(mtx_t* mutex, int type);
+
+int mtx_lock(mtx_t* mutex);
+
+int mtx_timedlock(mtx_t* mutex, const struct timespec* time_point);
+
+int mtx_trylock(mtx_t* mutex);
+
+int mtx_unlock(mtx_t* mutex);
+
+void mtx_destroy(mtx_t* mutex);
+
 #elif !defined(__STDC_NO_THREADS__)
 
 #include <threads.h>
