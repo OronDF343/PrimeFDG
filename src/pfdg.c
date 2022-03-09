@@ -120,7 +120,7 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chun
 			fwrite(&h, sizeof(pfdg_file_header), 1, f);
 		}
 
-		//io_init(f, chunks);
+		io_init(f, chunks);
 	}
 
 	//PFDG_TIMESTAMP t_start, t_end;
@@ -163,10 +163,10 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chun
 					// Write chunks to file in order!
 #pragma omp ordered
 					{
-						//io_enqueue(arr);
-						bitarray_serialize_to_file(arr, f);
+						io_enqueue(arr);
+						//bitarray_serialize_to_file(arr, f);
 					}
-					bitarray_delete(arr);
+					//bitarray_delete(arr);
 				}
 				else
 				{
@@ -181,7 +181,7 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chun
 	//const PFDG_TIMESTAMP diff = pfdg_timestamp_diff(t_start, t_end);
 	//printf("Time: %f seconds\n", pfdg_timestamp_microseconds(diff) / 1000000.0);
 
-	//if (f != NULL) io_end();
+	if (f != NULL) io_end();
 
 	// Handle abortion
 	if (abort) return false;

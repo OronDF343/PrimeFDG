@@ -6,6 +6,8 @@
 thrd_t thread;
 pevent_t event_data_available;
 pevent_t event_data_freed;
+mtx_t mutex_data;
+mtx_t mutex_enqueue;
 typedef struct {
 	uint64_t size;
 	bitarray** data;
@@ -23,22 +25,21 @@ int io_proc(void* queue_v)
 	{
 		if (queue->count > 0)
 		{
-			// TODO: Mutex2 lock start
+			mtx_lock(&mutex_data);
 			bitarray* item = queue->data[queue->start];
 			queue->start = (queue->start + 1) % queue->size;
 			queue->count--;
-			// TODO: Mutex2 lock end
+			mtx_unlock(&mutex_data);
+
 			pevent_set(event_data_freed);
 			bitarray_serialize_to_file(item, queue->file);
 			bitarray_delete(item);
 		}
 		else
 		{
-			// TODO: Wait for available data correctly
+			// Wait for available data
 			thrd_yield();
 			pevent_wait(event_data_available, 10);
-			//struct timespec duration = { .tv_sec = 0, .tv_nsec = 10000000 }; // 10ms
-			//thrd_sleep(&duration, NULL);
 		}
 	}
 	return 0;
@@ -57,25 +58,26 @@ void io_init(FILE* file, const uint64_t queue_length)
 
 	event_data_available = pevent_create(false, false);
 	event_data_freed = pevent_create(false, false);
+
+	mtx_init(&mutex_data, mtx_plain);
+	mtx_init(&mutex_enqueue, mtx_plain);
 }
 
 void io_enqueue(bitarray* source)
 {
-	// TODO: Mutex lock start
+	mtx_lock(&mutex_enqueue);
 	while (thread_arg->count >= thread_arg->size)
 	{
-		// TODO: Wait for available slot correctly
+		// Wait for available slot
 		thrd_yield();
 		pevent_wait(event_data_freed, 10);
-		//struct timespec duration = { .tv_sec = 0, .tv_nsec = 10000000 }; // 10ms
-		//thrd_sleep(&duration, NULL);
 	}
-	// TODO: Mutex2 lock start
+	mtx_lock(&mutex_data);
 	thread_arg->data[(thread_arg->start + thread_arg->count) % thread_arg->size] = source;
 	thread_arg->count++;
-	// TODO: Mutex2 lock end
+	mtx_unlock(&mutex_data);
 	pevent_set(event_data_available);
-	// TODO: Mutex lock end
+	mtx_unlock(&mutex_enqueue);
 }
 
 void io_end()
@@ -88,4 +90,6 @@ void io_end()
 	free(thread_arg);
 	pevent_destroy(event_data_available);
 	pevent_destroy(event_data_freed);
+	mtx_destroy(&mutex_data);
+	mtx_destroy(&mutex_enqueue);
 }
