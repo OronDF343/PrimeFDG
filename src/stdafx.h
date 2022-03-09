@@ -51,7 +51,7 @@ typedef enum { false = 0, true = 1 } bool;
 #define MAX(a,b) (((a)>(b))?(a):(b))
 #define ALIGNED_MALLOC(size, alignment) (aligned_alloc((alignment), (size)))
 #define ALIGNED_FREE free
-#define ATOI64 atoi
+#define ATOI64 atoll
 #define inline
 
 #else
