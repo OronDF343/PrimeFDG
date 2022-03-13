@@ -118,7 +118,6 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -142,7 +141,6 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -168,6 +166,8 @@
     <ClInclude Include="bitarray.h" />
     <ClInclude Include="cpuid.h" />
     <ClInclude Include="io.h" />
+    <ClInclude Include="pevents.h" />
+    <ClInclude Include="pevents_c.h" />
     <ClInclude Include="threads.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="options.h" />
@@ -182,6 +182,8 @@
     <ClCompile Include="bitarray.c" />
     <ClCompile Include="cpuid.c" />
     <ClCompile Include="io.c" />
+    <ClCompile Include="pevents.cpp" />
+    <ClCompile Include="pevents_c.cpp" />
     <ClCompile Include="pfdg.c" />
     <ClCompile Include="PrimeFDG.c" />
     <ClCompile Include="stdafx.c">

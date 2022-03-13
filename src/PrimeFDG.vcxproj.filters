@@ -51,6 +51,12 @@
     <ClInclude Include="threads.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pevents.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pevents_c.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bitarray.c">
@@ -69,6 +75,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="io.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pevents.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pevents_c.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
