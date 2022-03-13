@@ -83,17 +83,53 @@ enum {
 
 typedef HANDLE mtx_t;
 
-int mtx_init(mtx_t* mutex, int type);
+int mtx_init(mtx_t* mutex, int type)
+{
+    if (type & mtx_recursive > 0)
+        return thrd_error; // Not supported
+    *mutex = CreateMutex(NULL, FALSE, NULL);
+    return thrd_success;
+}
 
-int mtx_lock(mtx_t* mutex);
+int mtx_lock(mtx_t* mutex)
+{
+    DWORD result = WaitForSingleObject(*mutex, INFINITE);
+    if (result == WAIT_OBJECT_0)
+        return thrd_success;
+    return thrd_error;
+}
 
-int mtx_timedlock(mtx_t* mutex, const struct timespec* time_point);
+int mtx_timedlock(mtx_t* mutex, const struct timespec* time_point)
+{
+    DWORD millis = (time_point->tv_sec * 1000000000 + time_point->tv_nsec) / 1000000;
+    DWORD result = WaitForSingleObject(*mutex, millis);
+    if (result == WAIT_OBJECT_0)
+        return thrd_success;
+    return thrd_error;
+}
 
-int mtx_trylock(mtx_t* mutex);
+int mtx_trylock(mtx_t* mutex)
+{
+    DWORD result = WaitForSingleObject(*mutex, 0);
+    if (result == WAIT_OBJECT_0)
+        return thrd_success;
+    else if (result == WAIT_TIMEOUT || result == WAIT_ABANDONED)
+        return thrd_busy;
+    return thrd_error;
+}
 
-int mtx_unlock(mtx_t* mutex);
+int mtx_unlock(mtx_t* mutex)
+{
+    DWORD result = ReleaseMutex(*mutex);
+    if (result == 0)
+        return thrd_error;
+    return thrd_success;
+}
 
-void mtx_destroy(mtx_t* mutex);
+void mtx_destroy(mtx_t* mutex)
+{
+    CloseHandle(*mutex);
+}
 
 #elif !defined(__STDC_NO_THREADS__)
 
