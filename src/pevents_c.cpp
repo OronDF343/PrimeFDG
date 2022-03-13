@@ -1,4 +1,5 @@
 #include "pevents_c.h"
+#include <Windows.h>
 #include "pevents.h"
 
 #ifdef __cplusplus
