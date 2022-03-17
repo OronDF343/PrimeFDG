@@ -27,9 +27,6 @@
     <ClInclude Include="pfmath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="options.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pfdg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -62,9 +59,6 @@
     <ClCompile Include="bitarray.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PrimeFDG.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -83,5 +77,8 @@
     <ClCompile Include="pevents_c.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

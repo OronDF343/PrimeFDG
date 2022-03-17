@@ -170,7 +170,6 @@
     <ClInclude Include="pevents_c.h" />
     <ClInclude Include="threads.h" />
     <ClInclude Include="timer.h" />
-    <ClInclude Include="options.h" />
     <ClInclude Include="pattern.h" />
     <ClInclude Include="pfdg.h" />
     <ClInclude Include="pfmath.h" />
@@ -186,12 +185,9 @@
     <ClCompile Include="pevents_c.cpp" />
     <ClCompile Include="pfdg.c" />
     <ClCompile Include="PrimeFDG.c" />
-    <ClCompile Include="stdafx.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
