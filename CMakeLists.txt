@@ -15,6 +15,7 @@ add_executable(PrimeFDG
     src/pevents.cpp
     src/pevents_c.cpp
     src/pfdg.c
+	src/cli.c
     src/PrimeFDG.c
 )
 target_link_libraries(PrimeFDG PRIVATE m)
