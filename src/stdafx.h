@@ -37,10 +37,8 @@ typedef enum {
 
 #ifdef _MSC_VER
 #define POPCNT __popcnt64
-#define CLZ64 __lzcnt64
 #else
 #define POPCNT _popcnt64
-#define CLZ64 __builtin_clzll
 #endif
 
 #else

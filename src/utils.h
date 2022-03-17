@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include <xmmintrin.h>
 #include <immintrin.h>
+#include "cpuid.h"
 
 #if _MSC_VER
 SINLINE void memcpy_aligned64_avx2(void*       const destination,
@@ -106,7 +107,7 @@ static const uint64_t powers[20] = {
 };
 
 SINLINE uint64_t log2floor(uint64_t x) {
-	return x ? 63ull - CLZ64(x) : 0;
+	return x ? 63ull - __builtin_clzll(x) : 0;
 }
 
 SINLINE unsigned log10floor(uint64_t x) {
