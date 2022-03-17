@@ -9,24 +9,24 @@
 
 PFDG_TIMESTAMP freq;
 
-inline void pfdg_timestamp_init()
+SINLINE void pfdg_timestamp_init()
 {
 	QueryPerformanceFrequency(&freq);
 }
 
-inline void pfdg_timestamp_get(PFDG_TIMESTAMP* ts)
+SINLINE void pfdg_timestamp_get(PFDG_TIMESTAMP* ts)
 {
 	QueryPerformanceCounter(ts);
 }
 
-inline PFDG_TIMESTAMP pfdg_timestamp_diff(const PFDG_TIMESTAMP start, const PFDG_TIMESTAMP end)
+SINLINE PFDG_TIMESTAMP pfdg_timestamp_diff(const PFDG_TIMESTAMP start, const PFDG_TIMESTAMP end)
 {
 	PFDG_TIMESTAMP res;
 	res.QuadPart = end.QuadPart - start.QuadPart;
 	return res;
 }
 
-inline uint64_t pfdg_timestamp_microseconds(const PFDG_TIMESTAMP ts)
+SINLINE uint64_t pfdg_timestamp_microseconds(const PFDG_TIMESTAMP ts)
 {
 	return (ts.QuadPart * 1000000Ui64) / freq.QuadPart;
 }
@@ -36,21 +36,21 @@ inline uint64_t pfdg_timestamp_microseconds(const PFDG_TIMESTAMP ts)
 
 PFDG_TIMESTAMP freq;
 
-inline void pfdg_timestamp_init()
+SINLINE void pfdg_timestamp_init()
 {
 	int err = clock_getres(CLOCK_MONOTONIC_RAW, &freq);
 	if (err != 0)
 		printf("clock error");
 }
 
-inline void pfdg_timestamp_get(PFDG_TIMESTAMP* ts)
+SINLINE void pfdg_timestamp_get(PFDG_TIMESTAMP* ts)
 {
 	int err = clock_gettime(CLOCK_MONOTONIC_RAW, ts);
 	if (err != 0)
 		printf("clock error");
 }
 
-inline PFDG_TIMESTAMP pfdg_timestamp_diff(const PFDG_TIMESTAMP start, const PFDG_TIMESTAMP end)
+SINLINE PFDG_TIMESTAMP pfdg_timestamp_diff(const PFDG_TIMESTAMP start, const PFDG_TIMESTAMP end)
 {
 	PFDG_TIMESTAMP res;
 	res.tv_sec = end.tv_sec - start.tv_sec;
@@ -58,7 +58,7 @@ inline PFDG_TIMESTAMP pfdg_timestamp_diff(const PFDG_TIMESTAMP start, const PFDG
 	return res;
 }
 
-inline uint64_t pfdg_timestamp_microseconds(const PFDG_TIMESTAMP ts)
+SINLINE uint64_t pfdg_timestamp_microseconds(const PFDG_TIMESTAMP ts)
 {
 	return ((ts.tv_sec * 1000000000ULL) + ts.tv_nsec) / 1000ULL;
 }

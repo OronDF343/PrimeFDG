@@ -2,10 +2,10 @@
 #include "cpuid.h"
 #include "bitarray.h"
 #include "pfmath.h"
-#ifdef __GNUC__
-#include <x86intrin.h>
-#else
+#ifdef _MSC_VER
 #include <intrin.h>
+#else
+#include <x86intrin.h>
 #endif
 
 bitarray * bitarray_create(const uint64_t capacity, const bool oddonly)
@@ -28,7 +28,7 @@ bitarray * bitarray_create(const uint64_t capacity, const bool oddonly)
 	return b;
 }
 
-void FINLINE bitarray_set(bitarray * const b, const uint64_t i)
+void bitarray_set(bitarray * const b, const uint64_t i)
 {
 	const uint64_t ia = b->oddonly ? i / 2 : i;
 	b->data[ia / BITS(BITARRAY_WORD)] |= OR_MASK(ia & (BITS(BITARRAY_WORD) - 1));

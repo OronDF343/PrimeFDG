@@ -4,7 +4,7 @@
 #include <immintrin.h>
 
 #if _MSC_VER
-static void memcpy_aligned64_avx2(void*       const destination,
+SINLINE void memcpy_aligned64_avx2(void*       const destination,
 				 size_t     const destination_size,
 				 void const* const source,
 				 size_t     const source_size)
@@ -23,7 +23,7 @@ static void memcpy_aligned64_avx2(void*       const destination,
 }
 #endif
 
-static void memcpy_aligned32_avx(void*       const destination,
+SINLINE void memcpy_aligned32_avx(void*       const destination,
 				 size_t     const destination_size,
 				 void const* const source,
 				 size_t     const source_size)
@@ -41,7 +41,7 @@ static void memcpy_aligned32_avx(void*       const destination,
 	_mm256_zeroupper();
 }
 
-static void memcpy_aligned16_sse(void*       const destination,
+SINLINE void memcpy_aligned16_sse(void*       const destination,
 				 size_t     const destination_size,
 				 void const* const source,
 				 size_t     const source_size)
@@ -58,7 +58,7 @@ static void memcpy_aligned16_sse(void*       const destination,
 	}
 }
 
-static void memcpy_aligned8(void*       const destination,
+SINLINE void memcpy_aligned8(void*       const destination,
 				 size_t     const destination_size,
 				 void const* const source,
 				 size_t     const source_size)
@@ -70,4 +70,46 @@ static void memcpy_aligned8(void*       const destination,
 	{
 		dest[i] = src[i];
 	}
+}
+
+static const unsigned char guesses[64] = {
+	0, 0, 0, 0, 1, 1, 1, 2, 2, 2,
+	3, 3, 3, 3, 4, 4, 4, 5, 5, 5,
+	6, 6, 6, 6, 7, 7, 7, 8, 8, 8,
+	9, 9, 9, 9, 10, 10, 10, 11, 11, 11,
+	12, 12, 12, 12, 13, 13, 13, 14, 14, 14,
+	15, 15, 15, 15, 16, 16, 16, 17, 17, 17,
+	18, 18, 18, 18
+};
+
+static const uint64_t powers[20] = {
+	1ull,
+	10ull,
+	100ull,
+	1000ull,
+	10000ull,
+	100000ull,
+	1000000ull,
+	10000000ull,
+	100000000ull,
+	1000000000ull,
+	10000000000ull,
+	100000000000ull,
+	1000000000000ull,
+	10000000000000ull,
+	100000000000000ull,
+	1000000000000000ull,
+	10000000000000000ull,
+	100000000000000000ull,
+	1000000000000000000ull,
+	10000000000000000000ull
+};
+
+SINLINE uint64_t log2floor(uint64_t x) {
+	return x ? 63ull - CLZ64(x) : 0;
+}
+
+SINLINE unsigned log10floor(uint64_t x) {
+	unsigned guess = guesses[log2floor(x)];
+	return guess + (x >= powers[guess + 1]);
 }

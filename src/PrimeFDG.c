@@ -80,81 +80,85 @@ void fill_test_omp(const uint64_t test_size, const int threads)
 	free(mem1);
 }
 
-int main(const int argc, const char** argv)
+void memcpy_test()
+{
+	// Test memcpy performance
+	const uint64_t test_size = 1048576 * 1024;
+	const uint64_t check_value = 0xFFEEDDCCBBAA9988;
+	pfdg_timestamp_init();
+	PFDG_TIMESTAMP t_start, t_end;
+	printf("Sequential copy %llu MiB test:\n", test_size / 1048576);
+
+	pfdg_timestamp_get(&t_start);
+	uint64_t* mem1 = ALIGNED_MALLOC(test_size, 32);
+	uint64_t* mem2 = ALIGNED_MALLOC(test_size, 32);
+	mem1[test_size / 8 - 1] = check_value;
+	mem2[test_size / 8 - 1] = 0;
+	memcpy_aligned32_avx(mem2, test_size, mem1, test_size);
+	printf("\nAVX-256: ");
+	if (mem2[test_size / 8 - 1] == check_value) printf("Success\n");
+	else printf("Failed\n");
+	pfdg_timestamp_get(&t_end);
+	print_timestamp_diff(t_start, t_end);
+	ALIGNED_FREE(mem1);
+	ALIGNED_FREE(mem2);
+
+	pfdg_timestamp_get(&t_start);
+	mem1 = ALIGNED_MALLOC(test_size, 16);
+	mem2 = ALIGNED_MALLOC(test_size, 16);
+	mem1[test_size / 8 - 1] = check_value;
+	mem2[test_size / 8 - 1] = 0;
+	memcpy_aligned16_sse(mem2, test_size, mem1, test_size);
+	printf("\nAVX/SSE-128: ");
+	if (mem2[test_size / 8 - 1] == check_value) printf("Success\n");
+	else printf("Failed\n");
+	pfdg_timestamp_get(&t_end);
+	print_timestamp_diff(t_start, t_end);
+	ALIGNED_FREE(mem1);
+	ALIGNED_FREE(mem2);
+
+	pfdg_timestamp_get(&t_start);
+	mem1 = malloc(test_size);
+	mem2 = malloc(test_size);
+	mem1[test_size / 8 - 1] = check_value;
+	mem2[test_size / 8 - 1] = 0;
+	memcpy_aligned8(mem2, test_size, mem1, test_size);
+	printf("\n64-bit: ");
+	if (mem2[test_size / 8 - 1] == check_value) printf("Success\n");
+	else printf("Failed\n");
+	pfdg_timestamp_get(&t_end);
+	print_timestamp_diff(t_start, t_end);
+	free(mem1);
+	free(mem2);
+
+	pfdg_timestamp_get(&t_start);
+	mem1 = malloc(test_size);
+	mem2 = malloc(test_size);
+	mem1[test_size / 8 - 1] = check_value;
+	mem2[test_size / 8 - 1] = 0;
+	memcpy(mem2, mem1, test_size);
+	printf("\nBuilt-in: ");
+	if (mem2[test_size / 8 - 1] == check_value) printf("Success\n");
+	else printf("Failed\n");
+	pfdg_timestamp_get(&t_end);
+	print_timestamp_diff(t_start, t_end);
+	free(mem1);
+	free(mem2);
+
+	fill_test_omp(test_size * 2, 4);
+	fill_test_omp(test_size * 2, 3);
+	fill_test_omp(test_size * 2, 2);
+	fill_test_omp(test_size * 2, 1);
+}
+
+int main(const int argc, char** argv)
 {
 	cpuid_init();
 	if (argc < 4)
 	{
 		if (argc == 2 && strcmp(argv[1], "test") == 0)
 		{
-			// Test memcpy performance
-			const uint64_t test_size = 1048576 * 1024;
-			const uint64_t check_value = 0xFFEEDDCCBBAA9988;
-			pfdg_timestamp_init();
-			PFDG_TIMESTAMP t_start, t_end;
-			printf("Sequential copy %llu MiB test:\n", test_size / 1048576);
-
-			pfdg_timestamp_get(&t_start);
-			uint64_t* mem1 = ALIGNED_MALLOC(test_size, 32);
-			uint64_t* mem2 = ALIGNED_MALLOC(test_size, 32);
-			mem1[test_size/8 - 1] = check_value;
-			mem2[test_size/8 - 1] = 0;
-			memcpy_aligned32_avx(mem2, test_size, mem1, test_size);
-			printf("\nAVX-256: ");
-			if (mem2[test_size/8 - 1] == check_value) printf("Success\n");
-			else printf("Failed\n");
-			pfdg_timestamp_get(&t_end);
-			print_timestamp_diff(t_start, t_end);
-			ALIGNED_FREE(mem1);
-			ALIGNED_FREE(mem2);
-
-			pfdg_timestamp_get(&t_start);
-			mem1 = ALIGNED_MALLOC(test_size, 16);
-			mem2 = ALIGNED_MALLOC(test_size, 16);
-			mem1[test_size/8 - 1] = check_value;
-			mem2[test_size/8 - 1] = 0;
-			memcpy_aligned16_sse(mem2, test_size, mem1, test_size);
-			printf("\nAVX/SSE-128: ");
-			if (mem2[test_size/8 - 1] == check_value) printf("Success\n");
-			else printf("Failed\n");
-			pfdg_timestamp_get(&t_end);
-			print_timestamp_diff(t_start, t_end);
-			ALIGNED_FREE(mem1);
-			ALIGNED_FREE(mem2);
-			
-			pfdg_timestamp_get(&t_start);
-			mem1 = malloc(test_size);
-			mem2 = malloc(test_size);
-			mem1[test_size/8 - 1] = check_value;
-			mem2[test_size/8 - 1] = 0;
-			memcpy_aligned8(mem2, test_size, mem1, test_size);
-			printf("\n64-bit: ");
-			if (mem2[test_size/8 - 1] == check_value) printf("Success\n");
-			else printf("Failed\n");
-			pfdg_timestamp_get(&t_end);
-			print_timestamp_diff(t_start, t_end);
-			free(mem1);
-			free(mem2);
-
-			pfdg_timestamp_get(&t_start);
-			mem1 = malloc(test_size);
-			mem2 = malloc(test_size);
-			mem1[test_size/8 - 1] = check_value;
-			mem2[test_size/8 - 1] = 0;
-			memcpy(mem2, mem1, test_size);
-			printf("\nBuilt-in: ");
-			if (mem2[test_size/8 - 1] == check_value) printf("Success\n");
-			else printf("Failed\n");
-			pfdg_timestamp_get(&t_end);
-			print_timestamp_diff(t_start, t_end);
-			free(mem1);
-			free(mem2);
-			
-			fill_test_omp(test_size * 2, 4);
-			fill_test_omp(test_size * 2, 3);
-			fill_test_omp(test_size * 2, 2);
-			fill_test_omp(test_size * 2, 1);
-			
+			memcpy_test();
 			return 0;
 		}
 		printf("PrimeFDG\nCopyright (c) 2022 by Oron Feinerman\n\nUsage: primefdg <start> <end> <num_threads>[:<chunks>] [<file>]\ndefault chunks = num_threads * 2^MAX(floor(log10(end)) - 1, 0)\n");
@@ -176,7 +180,7 @@ int main(const int argc, const char** argv)
 	}
 
 	const int num_threads = atoi(threads_str);
-	uint64_t l = (uint64_t)log10(end);
+	uint64_t l = (uint64_t)log10floor(end);
 	if (l > 0) l--;
 	const uint64_t chunks = chunks_str == NULL ? (uint64_t)num_threads << l : ATOI64(chunks_str);
 	const char* file = argc < 5 ? NULL : argv[4];

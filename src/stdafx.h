@@ -20,43 +20,43 @@
 typedef enum { false = 0, true = 1 } bool;
 
 #define BITS(t) (sizeof(t)*8)
+#define SINLINE static inline
+
+typedef enum {
+	pfdg_success = 0,
+	pfdg_error_malloc = 1,
+	pfdg_error_command = 2,
+	pfdg_error_arg = 3,
+	pfdg_error_number_of_args = 4,
+	pfdg_error_io = 5
+} pfdg_error_t;
 
 #if _M_X64 || __LP64__
 
 #define BITARRAY_WORD uint64_t
 
-#ifdef __GNUC__
-#define POPCNT _popcnt64
-#else
+#ifdef _MSC_VER
 #define POPCNT __popcnt64
+#define CLZ64 __lzcnt64
+#else
+#define POPCNT _popcnt64
+#define CLZ64 __builtin_clzll
 #endif
 
 #else
 
 #define BITARRAY_WORD uint32_t
 
-#ifdef __GNUC__
-#define POPCNT _popcnt
-#else
+#ifdef _MSC_VER
 #define POPCNT __popcnt
-#endif
-
-#endif
-
-#ifdef __GNUC__
-
-#define FINLINE __attribute__((always_inline))
-#define ALIGN32 __attribute__((aligned(32)))
-#define MIN(a,b) (((a)<(b))?(a):(b))
-#define MAX(a,b) (((a)>(b))?(a):(b))
-#define ALIGNED_MALLOC(size, alignment) (aligned_alloc((alignment), (size)))
-#define ALIGNED_FREE free
-#define ATOI64 atoll
-#define inline
-
 #else
+#define POPCNT _popcnt
+#endif
 
-#define FINLINE __forceinline
+#endif
+
+#ifdef _MSC_VER
+
 #define ALIGN32 __declspec(align(32))
 #define MIN __min
 #define MAX __max
@@ -64,6 +64,15 @@ typedef enum { false = 0, true = 1 } bool;
 #define ALIGNED_FREE _aligned_free
 #define ATOI64 _atoi64
 #define _CRT_SECURE_NO_WARNINGS 1
+
+#else
+
+#define ALIGN32 __attribute__((aligned(32)))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define ALIGNED_MALLOC(size, alignment) (aligned_alloc((alignment), (size)))
+#define ALIGNED_FREE free
+#define ATOI64 atoll
 
 #endif
 

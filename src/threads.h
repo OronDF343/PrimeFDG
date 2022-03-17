@@ -15,7 +15,7 @@ enum {
 typedef HANDLE thrd_t;
 typedef LPTHREAD_START_ROUTINE thrd_start_t;
 
-int thrd_create(thrd_t* thr, thrd_start_t func, void* arg)
+SINLINE int thrd_create(thrd_t* thr, thrd_start_t func, void* arg)
 {
 	DWORD thrdId;
 	*thr = CreateThread(NULL, 0, func, arg, 0, &thrdId);
@@ -24,19 +24,19 @@ int thrd_create(thrd_t* thr, thrd_start_t func, void* arg)
     return thrd_success;
 }
 
-int thrd_equal(thrd_t lhs, thrd_t rhs)
+SINLINE int thrd_equal(thrd_t lhs, thrd_t rhs)
 {
     return lhs == rhs ? 1 : 0;
 }
 
-thrd_t thrd_current()
+SINLINE thrd_t thrd_current()
 {
     return GetCurrentThread();
 }
 
-int thrd_sleep(const struct timespec* duration, struct timespec* remaining)
+SINLINE int thrd_sleep(const struct timespec* duration, struct timespec* remaining)
 {
-    DWORD millis = (duration->tv_sec * 1000000000 + duration->tv_nsec) / 1000000;
+    DWORD millis = (DWORD)((duration->tv_sec * 1000000000 + duration->tv_nsec) / 1000000);
     Sleep(millis);
     if (remaining != NULL)
     {
@@ -46,17 +46,17 @@ int thrd_sleep(const struct timespec* duration, struct timespec* remaining)
     return 0;
 }
 
-void thrd_yield()
+SINLINE void thrd_yield()
 {
     SwitchToThread();
 }
 
-_Noreturn void thrd_exit(int res)
+SINLINE _Noreturn void thrd_exit(int res)
 {
     ExitThread(res);
 }
 
-int thrd_detach(thrd_t thr)
+SINLINE int thrd_detach(thrd_t thr)
 {
     BOOL res = CloseHandle(thr);
     if (res == TRUE)
@@ -64,10 +64,10 @@ int thrd_detach(thrd_t thr)
     return thrd_error;
 }
 
-int thrd_join(thrd_t thr, int* res)
+SINLINE int thrd_join(thrd_t thr, int* res)
 {
     DWORD r = WaitForSingleObject(thr, INFINITE);
-    if (r != NULL)
+    if (r != 0)
         GetExitCodeThread(thr, res);
     if (r != WAIT_OBJECT_0)
         return thrd_error;
@@ -83,15 +83,15 @@ enum {
 
 typedef HANDLE mtx_t;
 
-int mtx_init(mtx_t* mutex, int type)
+SINLINE int mtx_init(mtx_t* mutex, int type)
 {
-    if (type & mtx_recursive > 0)
+    if ((type & mtx_recursive) > 0)
         return thrd_error; // Not supported
     *mutex = CreateMutex(NULL, FALSE, NULL);
     return thrd_success;
 }
 
-int mtx_lock(mtx_t* mutex)
+SINLINE int mtx_lock(mtx_t* mutex)
 {
     DWORD result = WaitForSingleObject(*mutex, INFINITE);
     if (result == WAIT_OBJECT_0)
@@ -99,16 +99,16 @@ int mtx_lock(mtx_t* mutex)
     return thrd_error;
 }
 
-int mtx_timedlock(mtx_t* mutex, const struct timespec* time_point)
+SINLINE int mtx_timedlock(mtx_t* mutex, const struct timespec* time_point)
 {
-    DWORD millis = (time_point->tv_sec * 1000000000 + time_point->tv_nsec) / 1000000;
+    DWORD millis = (DWORD)((time_point->tv_sec * 1000000000 + time_point->tv_nsec) / 1000000);
     DWORD result = WaitForSingleObject(*mutex, millis);
     if (result == WAIT_OBJECT_0)
         return thrd_success;
     return thrd_error;
 }
 
-int mtx_trylock(mtx_t* mutex)
+SINLINE int mtx_trylock(mtx_t* mutex)
 {
     DWORD result = WaitForSingleObject(*mutex, 0);
     if (result == WAIT_OBJECT_0)
@@ -118,7 +118,7 @@ int mtx_trylock(mtx_t* mutex)
     return thrd_error;
 }
 
-int mtx_unlock(mtx_t* mutex)
+SINLINE int mtx_unlock(mtx_t* mutex)
 {
     DWORD result = ReleaseMutex(*mutex);
     if (result == 0)
@@ -126,7 +126,7 @@ int mtx_unlock(mtx_t* mutex)
     return thrd_success;
 }
 
-void mtx_destroy(mtx_t* mutex)
+SINLINE void mtx_destroy(mtx_t* mutex)
 {
     CloseHandle(*mutex);
 }
