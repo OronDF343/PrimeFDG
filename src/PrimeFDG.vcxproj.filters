@@ -54,6 +54,9 @@
     <ClInclude Include="pevents_c.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cli.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bitarray.c">
@@ -75,6 +78,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pevents_c.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cli.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -164,6 +164,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="bitarray.h" />
+    <ClInclude Include="cli.h" />
     <ClInclude Include="cpuid.h" />
     <ClInclude Include="io.h" />
     <ClInclude Include="pevents.h" />
@@ -179,6 +180,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bitarray.c" />
+    <ClCompile Include="cli.c" />
     <ClCompile Include="cpuid.c" />
     <ClCompile Include="io.c" />
     <ClCompile Include="pevents.cpp" />
