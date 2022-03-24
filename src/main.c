@@ -216,7 +216,8 @@ int main(const int argc, char** argv)
 		printf("%s: The number of tasks that the computation will be split into. Supports exponent specifiers. This is an advanced option that can be used to tune performance. If unspecified, the value will be calculated as such: %s * 2^MAX(floor(log10(%s)) - 1, 0)\n", PFDG_STR_ARG(pfdg_arg_chunks), PFDG_STR_ARG(pfdg_arg_threads), PFDG_STR_ARG(pfdg_arg_end));
 		printf("%s: Limits the maximum amount of memory to use for computation. Supports exponent specifiers.\n", PFDG_STR_ARG(pfdg_arg_maxmem));
 		printf("%s: The path to a file to which the computation results will be stored. If unspecified, the results will be discarded immediately.\n", PFDG_STR_ARG(pfdg_arg_outfile));
-		printf("\nUsage example: primefdg sieve start=1 end=1e12 threads=8\n");
+		printf("\nUsage example: primefdg sieve end=1e12 threads=8\n");
+		printf("\nExponent specifiers (base 10): k,m,g,t,e\nExponent specifiers (base 2): K,M,G,T\n");
 		return 0;
 	}
 	if (args->command == pfdg_command_test)
