@@ -8,7 +8,7 @@
             // Resolved by CMake Tools:
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "1", "1000000000", "8", "build/test1"
+                "sieve", "end=1000000000", "threads=8", "outfile=build/test1"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

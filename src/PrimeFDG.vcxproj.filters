@@ -62,7 +62,7 @@
     <ClCompile Include="bitarray.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PrimeFDG.c">
+    <ClCompile Include="main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pfdg.c">

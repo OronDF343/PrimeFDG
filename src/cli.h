@@ -60,7 +60,7 @@ typedef struct {
 	char* outfile;
 	char* infile;
 	pfdg_error_t error;
-	char* message;
+	const char* message;
 } pfdg_args_t;
 
 pfdg_args_t* pfdg_cli_parse(const int argc, char** argv);

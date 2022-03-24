@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "pattern.h"
 #include "cpuid.h"
+#include "cli.h"
 #include <math.h>
 
 void print_timestamp_diff(const PFDG_TIMESTAMP t_start, const PFDG_TIMESTAMP t_end)
@@ -154,47 +155,87 @@ void memcpy_test()
 int main(const int argc, char** argv)
 {
 	cpuid_init();
-	if (argc < 4)
+
+	pfdg_args_t* args = pfdg_cli_parse(argc, argv);
+
+	if (args == NULL)
 	{
-		if (argc == 2 && strcmp(argv[1], "test") == 0)
+		printf("Out of memory");
+		return 2;
+	}
+
+	if (args->error != pfdg_success)
+	{
+		printf("PrimeFDG\nCopyright (c) 2022 by Oron Feinerman\n");
+		switch (args->error)
 		{
-			memcpy_test();
-			return 0;
+		case pfdg_error_command:
+			if (args->message == NULL)
+				printf("Error: No command specified");
+			else
+				printf("Error: Unrecognized command \"%s\"", args->message);
+			break;
+		case pfdg_error_number_of_args:
+			printf("Error: Wrong number of arguments");
+			break;
+		case pfdg_error_arg:
+			if (args->message == NULL)
+				printf("Error: Argument parsing failed");
+			else
+				printf("Error: Unrecognized argument \"%s\"", args->message);
+			break;
+		case pfdg_error_arg_value:
+			if (args->message == NULL)
+				printf("Error: Argument value parsing failed");
+			else
+				printf("Error: Inavlid argument value \"%s\"", args->message);
+			break;
+		case pfdg_error_arg_precondition:
+			if (args->message == NULL)
+				printf("Error: Argument validation failed");
+			else
+				printf("Error: Argument \"%s\" value does not meet precondition", args->message);
+			break;
 		}
-		printf("PrimeFDG\nCopyright (c) 2022 by Oron Feinerman\n\nUsage: primefdg <start> <end> <num_threads>[:<chunks>] [<file>]\ndefault chunks = num_threads * 2^MAX(floor(log10(end)) - 1, 0)\n");
+		printf("\nRun \"primefdg help\" for usage information.\n");
+		return 1;
+	}
+
+	if (args->command == pfdg_command_help)
+	{
+		printf("PrimeFDG\nCopyright (c) 2022 by Oron Feinerman\n\nUsage: primefdg <command> [<argument>=<value>...]\n(the syntax is similar to dd)\n");
+		printf("\nAvailable commands:\n");
+		printf("%s: Prints this message. This command does not accept arguments.\n", PFDG_STR_CMD(pfdg_command_help));
+		printf("%s: Runs a memcpy speed test. This command does not accept arguments.\n", PFDG_STR_CMD(pfdg_command_test));
+		printf("%s: Finds prime numbers within a given range.\n", PFDG_STR_CMD(pfdg_command_sieve));
+		printf("%s: Calculates the estimated memory usage of a %s command with the same arguments.\n", PFDG_STR_CMD(pfdg_command_mem), PFDG_STR_CMD(pfdg_command_sieve));
+		printf("\nAvailable arguments:\n");
+		printf("%s: The start of the range in which to find prime numbers. Supports exponent specifiers. Values below 3 are set to 3. If unspecified, will be set to 0.\n", PFDG_STR_ARG(pfdg_arg_start));
+		printf("%s: The end of the range in which to find prime numbers. Supports exponent specifiers. Required.\n", PFDG_STR_ARG(pfdg_arg_end));
+		printf("%s: The number of threads to use for computation. If unspecified or equal to 0, will be set to the number of CPU threads available.\n", PFDG_STR_ARG(pfdg_arg_threads));
+		printf("%s: The number of tasks that the computation will be split into. Supports exponent specifiers. This is an advanced option that can be used to tune performance. If unspecified, the value will be calculated as such: %s * 2^MAX(floor(log10(%s)) - 1, 0)\n", PFDG_STR_ARG(pfdg_arg_chunks), PFDG_STR_ARG(pfdg_arg_threads), PFDG_STR_ARG(pfdg_arg_end));
+		printf("%s: Limits the maximum amount of memory to use for computation. Supports exponent specifiers.\n", PFDG_STR_ARG(pfdg_arg_maxmem));
+		printf("%s: The path to a file to which the computation results will be stored. If unspecified, the results will be discarded immediately.\n", PFDG_STR_ARG(pfdg_arg_outfile));
+		printf("\nUsage example: primefdg sieve start=1 end=1e12 threads=8\n");
+		return 0;
+	}
+	if (args->command == pfdg_command_test)
+	{
+		memcpy_test();
 		return 0;
 	}
 
-	// Parse args
-	const uint64_t start = ATOI64(argv[1]);
-	const uint64_t end = ATOI64(argv[2]);
-
-	char* num_str = argv[3];
-	char* threads_str = num_str;
-	char* chunks_str = NULL;
-	char* colon = strchr(num_str, ':');
-	if (colon)
-	{
-		*colon = '\0';
-		chunks_str = colon + 1;
-	}
-
-	const int num_threads = atoi(threads_str);
-	uint64_t l = (uint64_t)log10floor(end);
-	if (l > 0) l--;
-	const uint64_t chunks = chunks_str == NULL ? (uint64_t)num_threads << l : ATOI64(chunks_str);
-	const char* file = argc < 5 ? NULL : argv[4];
-
-	printf("Using %i threads, %llu chunks\n", num_threads, chunks);
+	printf("Using %i threads, %llu chunks\n", args->threads, args->chunks);
 
 	pfdg_timestamp_init();
-	omp_set_num_threads(num_threads);
+	if (args->threads > 0)
+		omp_set_num_threads(args->threads);
 
 	PFDG_TIMESTAMP t_start, t_end;
 	pfdg_timestamp_get(&t_start);
 
 	uint64_t res;
-	const bool r = pfdg_sieve_parallel(start, end, chunks, file, &res);
+	const bool r = pfdg_sieve_parallel(args->start, args->end, args->chunks, args->outfile, &res);
 	if (!r)
 	{
 		printf("Out of memory!");
