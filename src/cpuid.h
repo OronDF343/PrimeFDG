@@ -15,7 +15,7 @@ SINLINE uint64_t __builtin_clzll(uint64_t x)
 	}
 	else
 	{
-		uint64_t leading_zero = 0;
+		unsigned long leading_zero = 0;
 		_BitScanReverse64(&leading_zero, x);
 		return leading_zero ^ 63;
 	}
