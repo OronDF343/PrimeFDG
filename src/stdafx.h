@@ -26,10 +26,11 @@ typedef enum {
 	pfdg_success = 0,
 	pfdg_error_malloc = 1,
 	pfdg_error_command = 2,
-	pfdg_error_arg = 3,
-	pfdg_error_arg_value = 4,
-	pfdg_error_number_of_args = 5,
-	pfdg_error_io = 6
+	pfdg_error_number_of_args = 3,
+	pfdg_error_arg = 4,
+	pfdg_error_arg_value = 5,
+	pfdg_error_arg_precondition = 6,
+	pfdg_error_io = 7
 } pfdg_error_t;
 
 #if _M_X64 || __LP64__
