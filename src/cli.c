@@ -85,7 +85,63 @@ pfdg_args_t* pfdg_cli_parse(const int argc, char** argv)
 		++value_str;
 		if (STRICMP(name_str, PFDG_STR_ARG(pfdg_arg_start)))
 		{
-			uint64_t value = ATOI64(value_str);
+			char* end;
+			unsigned long long value = strtoull(value_str, &end, 0);
+			if (end == value_str || value >= UINT64_MAX)
+			{
+				args->error = pfdg_error_arg_value;
+				args->message = argv[i];
+				return args;
+			}
+			args->start = (uint64_t)value;
+		}
+		else if (STRICMP(name_str, PFDG_STR_ARG(pfdg_arg_end)))
+		{
+			char* end;
+			unsigned long long value = strtoull(value_str, &end, 0);
+			if (end == value_str || value >= UINT64_MAX)
+			{
+				args->error = pfdg_error_arg_value;
+				args->message = argv[i];
+				return args;
+			}
+			args->end = (uint64_t)value;
+		}
+		else if (STRICMP(name_str, PFDG_STR_ARG(pfdg_arg_threads)))
+		{
+			char* end;
+			unsigned long value = strtoul(value_str, &end, 0);
+			if (end == value_str || value >= INT_MAX)
+			{
+				args->error = pfdg_error_arg_value;
+				args->message = argv[i];
+				return args;
+			}
+			args->threads = (int)value;
+		}
+		else if (STRICMP(name_str, PFDG_STR_ARG(pfdg_arg_chunks)))
+		{
+			char* end;
+			unsigned long long value = strtoull(value_str, &end, 0);
+			if (end == value_str || value >= UINT64_MAX || value < 1)
+			{
+				args->error = pfdg_error_arg_value;
+				args->message = argv[i];
+				return args;
+			}
+			args->chunks = (uint64_t)value;
+		}
+		else if (STRICMP(name_str, PFDG_STR_ARG(pfdg_arg_maxmem)))
+		{
+			char* end;
+			unsigned long long value = strtoull(value_str, &end, 0);
+			if (end == value_str || value == UINT64_MAX || value < 1)
+			{
+				args->error = pfdg_error_arg_value;
+				args->message = argv[i];
+				return args;
+			}
+			args->maxmem = (uint64_t)value;
 		}
 	}
 

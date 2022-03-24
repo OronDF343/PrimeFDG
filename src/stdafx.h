@@ -27,8 +27,9 @@ typedef enum {
 	pfdg_error_malloc = 1,
 	pfdg_error_command = 2,
 	pfdg_error_arg = 3,
-	pfdg_error_number_of_args = 4,
-	pfdg_error_io = 5
+	pfdg_error_arg_value = 4,
+	pfdg_error_number_of_args = 5,
+	pfdg_error_io = 6
 } pfdg_error_t;
 
 #if _M_X64 || __LP64__
