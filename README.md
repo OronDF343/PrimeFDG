@@ -26,6 +26,9 @@ maxmem: Limits the maximum amount of memory to use for computation. Supports exp
 outfile: The path to a file to which the computation results will be stored. If unspecified, the results will be discarded immediately.
 
 Usage example: primefdg sieve start=1 end=1e12 threads=8
+
+Exponent specifiers (base 10): k,m,g,t,e
+Exponent specifiers (base 2): K,M,G,T
 ```
 
 ## Building
