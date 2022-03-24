@@ -3,6 +3,31 @@ Find prime numbers using an optimized, multithreaded and segmented Sieve of Erat
 
 The successor to my previous related projects.
 
+## Usage
+
+**Note: The usage has changed recently**
+
+```
+Usage: primefdg <command> [<argument>=<value>...]
+(the syntax is similar to dd)
+
+Available commands:
+help: Prints this message. This command does not accept arguments.
+test: Runs a memcpy speed test. This command does not accept arguments.
+sieve: Finds prime numbers within a given range.
+mem: Calculates the estimated memory usage of a sieve command with the same arguments.
+
+Available arguments:
+start: The start of the range in which to find prime numbers. Supports exponent specifiers. Values below 3 are set to 3. If unspecified, will be set to 0.
+end: The end of the range in which to find prime numbers. Supports exponent specifiers. Required.
+threads: The number of threads to use for computation. If unspecified or equal to 0, will be set to the number of CPU threads available.
+chunks: The number of tasks that the computation will be split into. Supports exponent specifiers. This is an advanced option that can be used to tune performance. If unspecified, the value will be calculated as such: threads * 2^MAX(floor(log10(end)) - 1, 0)
+maxmem: Limits the maximum amount of memory to use for computation. Supports exponent specifiers.
+outfile: The path to a file to which the computation results will be stored. If unspecified, the results will be discarded immediately.
+
+Usage example: primefdg sieve start=1 end=1e12 threads=8
+```
+
 ## Building
 ### On Linux (CMake + GCC)
 Prerequisites (on Debian):
