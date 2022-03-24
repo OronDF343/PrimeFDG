@@ -1,6 +1,7 @@
 #include "cli.h"
 #include <stdlib.h>
 #include <string.h>
+#include "utils.h"
 
 #if _MSC_VER
 #define STRNICMP _strnicmp
@@ -9,6 +10,82 @@
 #define STRNICMP strncasecmp
 #define STRICMP strcasecmp
 #endif
+
+bool pfdg_cli_parse_number(char* value_str, uint64_t* res)
+{
+	char* end;
+	unsigned long long value = strtoull(value_str, &end, 0);
+	if (end == value_str || value >= UINT64_MAX)
+	{
+		return false;
+	}
+	// If string did not end, continue parsing
+	if (*end != 0)
+	{
+		uint64_t scale = 1;
+		switch (*end)
+		{
+		case 'k':
+			scale = 1000ull;
+			++end;
+			break;
+		case 'K':
+			scale = 1ull << 10;
+			++end;
+			break;
+		case 'm':
+			scale = 1000000ull;
+			++end;
+			break;
+		case 'M':
+			scale = 1ull << 20;
+			++end;
+			break;
+		case 'g':
+			scale = 1000000000ull;
+			++end;
+			break;
+		case 'G':
+			scale = 1ull << 30;
+			++end;
+			break;
+		case 't':
+			scale = 1000000000000ull;
+			++end;
+			break;
+		case 'T':
+			scale = 1ull << 40;
+			++end;
+			break;
+		case 'e':
+		case 'E':
+			char* end2;
+			unsigned long long exponent = strtoull(end + 1, &end2, 10);
+			if (end2 != end + 1 && exponent < POWERS_LEN)
+			{
+				scale = powers[exponent];
+				end = end2;
+			}
+			break;
+		}
+
+		if (*end != 0)
+		{
+			return false;
+		}
+
+		if (__builtin_umulll_overflow(value, scale, res))
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	*res = value;
+	return true;
+}
 
 pfdg_args_t* pfdg_cli_parse(const int argc, char** argv)
 {
@@ -83,29 +160,15 @@ pfdg_args_t* pfdg_cli_parse(const int argc, char** argv)
 		}
 		*value_str = '\0';
 		++value_str;
+
+		bool parse_success = false;
 		if (STRICMP(name_str, PFDG_STR_ARG(pfdg_arg_start)))
 		{
-			char* end;
-			unsigned long long value = strtoull(value_str, &end, 0);
-			if (end == value_str || value >= UINT64_MAX)
-			{
-				args->error = pfdg_error_arg_value;
-				args->message = argv[i];
-				return args;
-			}
-			args->start = (uint64_t)value;
+			parse_success = pfdg_cli_parse_number(value_str, &args->start);
 		}
 		else if (STRICMP(name_str, PFDG_STR_ARG(pfdg_arg_end)))
 		{
-			char* end;
-			unsigned long long value = strtoull(value_str, &end, 0);
-			if (end == value_str || value >= UINT64_MAX)
-			{
-				args->error = pfdg_error_arg_value;
-				args->message = argv[i];
-				return args;
-			}
-			args->end = (uint64_t)value;
+			parse_success = pfdg_cli_parse_number(value_str, &args->end);
 		}
 		else if (STRICMP(name_str, PFDG_STR_ARG(pfdg_arg_threads)))
 		{
@@ -113,35 +176,26 @@ pfdg_args_t* pfdg_cli_parse(const int argc, char** argv)
 			unsigned long value = strtoul(value_str, &end, 0);
 			if (end == value_str || value >= INT_MAX)
 			{
-				args->error = pfdg_error_arg_value;
-				args->message = argv[i];
-				return args;
+				parse_success = false;
 			}
 			args->threads = (int)value;
+			parse_success = true;
 		}
 		else if (STRICMP(name_str, PFDG_STR_ARG(pfdg_arg_chunks)))
 		{
-			char* end;
-			unsigned long long value = strtoull(value_str, &end, 0);
-			if (end == value_str || value >= UINT64_MAX || value < 1)
-			{
-				args->error = pfdg_error_arg_value;
-				args->message = argv[i];
-				return args;
-			}
-			args->chunks = (uint64_t)value;
+			parse_success = pfdg_cli_parse_number(value_str, &args->chunks);
 		}
 		else if (STRICMP(name_str, PFDG_STR_ARG(pfdg_arg_maxmem)))
 		{
-			char* end;
-			unsigned long long value = strtoull(value_str, &end, 0);
-			if (end == value_str || value == UINT64_MAX || value < 1)
-			{
-				args->error = pfdg_error_arg_value;
-				args->message = argv[i];
-				return args;
-			}
-			args->maxmem = (uint64_t)value;
+			parse_success = pfdg_cli_parse_number(value_str, &args->maxmem);
+		}
+
+		// Stop if parse failed
+		if (!parse_success)
+		{
+			args->error = pfdg_error_arg_value;
+			args->message = argv[i];
+			return args;
 		}
 	}
 

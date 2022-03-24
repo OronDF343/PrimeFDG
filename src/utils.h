@@ -73,7 +73,8 @@ SINLINE void memcpy_aligned8(void*       const destination,
 	}
 }
 
-static const unsigned char guesses[64] = {
+#define GUESSES_LEN 64
+static const unsigned char guesses[GUESSES_LEN] = {
 	0, 0, 0, 0, 1, 1, 1, 2, 2, 2,
 	3, 3, 3, 3, 4, 4, 4, 5, 5, 5,
 	6, 6, 6, 6, 7, 7, 7, 8, 8, 8,
@@ -83,7 +84,8 @@ static const unsigned char guesses[64] = {
 	18, 18, 18, 18
 };
 
-static const uint64_t powers[20] = {
+#define POWERS_LEN 20
+static const uint64_t powers[POWERS_LEN] = {
 	1ull,
 	10ull,
 	100ull,
@@ -106,11 +108,21 @@ static const uint64_t powers[20] = {
 	10000000000000000000ull
 };
 
-SINLINE uint64_t log2floor(uint64_t x) {
+SINLINE uint64_t log2floor(uint64_t x)
+{
 	return x ? 63ull - __builtin_clzll(x) : 0;
 }
 
-SINLINE unsigned log10floor(uint64_t x) {
+SINLINE unsigned log10floor(uint64_t x)
+{
 	unsigned guess = guesses[log2floor(x)];
 	return guess + (x >= powers[guess + 1]);
 }
+
+#ifdef _MSC_VER
+SINLINE bool __builtin_umulll_overflow(unsigned long long a, unsigned long long b, unsigned long long* res)
+{
+	*res = a * b;
+	return b != 0 && *res / b != a;
+}
+#endif
