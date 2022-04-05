@@ -1,7 +1,4 @@
-﻿// PrimeFDG.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "pfdg.h"
 #include "timer.h"
 #include "utils.h"
@@ -226,11 +223,9 @@ int main(const int argc, char** argv)
 		return 0;
 	}
 
-	printf("Using %i threads, %llu chunks\n", args->threads, args->chunks);
-
 	pfdg_timestamp_init();
-	if (args->threads > 0)
-		omp_set_num_threads(args->threads);
+
+	printf("Using %i threads, %llu chunks\n", args->threads, args->chunks);
 
 	PFDG_TIMESTAMP t_start, t_end;
 	pfdg_timestamp_get(&t_start);
