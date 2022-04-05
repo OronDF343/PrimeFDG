@@ -226,13 +226,19 @@ pfdg_args_t* pfdg_cli_parse(const int argc, char** argv)
 		return args;
 	}
 
-	// TODO: Apply defaults for maxmem and threads
+	if (args->threads > 0)
+		omp_set_num_threads(args->threads);
+	else
+		args->threads = omp_get_max_threads();
+
 	if (args->chunks == 0)
 	{
 		uint64_t l = (uint64_t)log10floor(args->end);
 		if (l > 0) l--;
 		args->chunks = (uint64_t)args->threads << l;
 	}
+	
+	// TODO: Apply defaults for maxmem
 
 	return args;
 }
