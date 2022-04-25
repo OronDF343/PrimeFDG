@@ -8,6 +8,17 @@
 #include <x86intrin.h>
 #endif
 
+uint64_t bitarray_get_required_mem(const uint64_t capacity, const bool oddonly)
+{
+	// Number of bits required
+	const uint64_t br = DIVUP(capacity, (oddonly + 1));
+	// Number of words required
+	const uint64_t wr = DIVUP(br, BITS(BITARRAY_WORD));
+	// Aligned just in case we ever use SIMD
+	const uint64_t bytes = DIVUP(wr * sizeof(BITARRAY_WORD), 32) * 32;
+	return bytes + sizeof(bitarray);
+}
+
 bitarray * bitarray_create(const uint64_t capacity, const bool oddonly)
 {
 	// Number of bits required

@@ -7,6 +7,30 @@
 #include "io.h"
 //#include "timer.h"
 
+uint64_t pfdg_mem_get_base(const uint64_t start, const uint64_t end)
+{
+	const uint64_t pattern_len = (PFDG_PATTERN_LENGTH + 1ULL) * sizeof(BITARRAY_WORD);
+	const uint64_t capacity = (uint64_t)sqrt((double)end) + 1;
+	return pattern_len + bitarray_get_required_mem(capacity, true);
+}
+
+uint64_t pfdg_mem_get_chunk_size(const uint64_t start, const uint64_t end, const uint64_t chunks)
+{
+	const uint64_t len = end - start;
+	uint64_t chunk_size = DIVUP(len, chunks);
+	chunk_size = DIVUP(chunk_size, BITS(BITARRAY_WORD) * 2) * BITS(BITARRAY_WORD) * 2;
+	return bitarray_get_required_mem(chunk_size, true);
+}
+
+uint64_t pfdg_mem_get_chunk_count_by_size(const uint64_t start, const uint64_t end, const uint64_t chunk_size)
+{
+	// Account for 32-byte alignment (TODO: Refactor)
+	uint64_t actual_size = (chunk_size / 32) * 32;
+	uint64_t len = end - start;
+	len = DIVUP(len, BITS(BITARRAY_WORD) * 2);
+	return DIVUP(len, actual_size);
+}
+
 bitarray* pfdg_init_bitarray(const uint64_t capacity, const uint64_t offset, const bool use_pattern)
 {
 	bitarray* arr = bitarray_create(capacity, true);
@@ -68,10 +92,11 @@ void pfdg_mark(bitarray* const arr, const uint64_t prime, const uint64_t offset)
 	/*for (; i * prime - offset < arr->capacity; i += 2)
 		bitarray_set(arr, i * prime - offset);*/
 	// Janky OpenMP SIMD implementation: (sometimes has ~10% performance improvement)
+	uint64_t limit = (uint64_t)ceil(((double)(arr->capacity + offset) / (double) prime - 1) / 2.0);
 	// ReSharper disable twice CppJoinDeclarationAndAssignment
 	uint64_t j; 
 #pragma omp simd
-	for (j = i / 2; j < (uint64_t)ceil(((double)(arr->capacity + offset) / (double) prime - 1) / 2.0); j++)
+	for (j = i / 2; j < limit; j++)
 		bitarray_set(arr, (j * 2 + 1) * prime - offset);
 }
 

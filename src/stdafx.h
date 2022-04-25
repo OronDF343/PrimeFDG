@@ -30,7 +30,10 @@ typedef enum {
 	pfdg_error_arg = 4,
 	pfdg_error_arg_value = 5,
 	pfdg_error_arg_precondition = 6,
-	pfdg_error_io = 7
+	pfdg_error_mem_base = 7,
+	pfdg_error_mem_min = 8,
+	pfdg_error_mem_chunk_size = 9,
+	pfdg_error_io = 10
 } pfdg_error_t;
 
 #if _M_X64 || __LP64__

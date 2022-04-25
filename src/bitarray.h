@@ -9,6 +9,7 @@ typedef struct
 	bool oddonly;
 } bitarray;
 
+uint64_t bitarray_get_required_mem(const uint64_t capacity, const bool oddonly);
 bitarray * bitarray_create(const uint64_t capacity, const bool oddonly);
 void bitarray_set(bitarray * const b, const uint64_t i);
 void bitarray_unset(bitarray * const b, const uint64_t i);
