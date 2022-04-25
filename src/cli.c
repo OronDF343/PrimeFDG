@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
+#include "pfdg.h"
 
 #if _MSC_VER
 #define STRNICMP _strnicmp
@@ -93,6 +94,7 @@ pfdg_args_t* pfdg_cli_parse(const int argc, char** argv)
 	args->start = 1;
 	args->end = 0;
 	args->threads = 0;
+	args->buffer_count = 0;
 	args->chunks = 0;
 	args->maxmem = 0;
 	args->outfile = NULL;
@@ -231,14 +233,75 @@ pfdg_args_t* pfdg_cli_parse(const int argc, char** argv)
 	else
 		args->threads = omp_get_max_threads();
 
+	bool chunk_count_user_specified = true;
 	if (args->chunks == 0)
 	{
+		chunk_count_user_specified = false;
 		uint64_t l = (uint64_t)log10floor(args->end);
 		if (l > 0) l--;
 		args->chunks = (uint64_t)args->threads << l;
 	}
 	
-	// TODO: Apply defaults for maxmem
+	args->buffer_count = args->threads;
+	if (args->outfile)
+	{
+		args->buffer_count += 1;
+	}
+	
+	if (args->maxmem > 0)
+	{
+		// Apply defaults for maxmem
+		// Step 1. Determine required memory for supporting data
+		// static pattern + prefix + known primes
+		uint64_t base_mem = pfdg_mem_get_base(args->start, args->end);
+		// Step 2. Determine maximum possible usage for specified number of chunks - limit requested memory to that
+		uint64_t chunk_size = pfdg_mem_get_chunk_size(args->start, args->end, args->chunks);
+		uint64_t max_chunk_mem = base_mem + chunk_size * args->chunks;
+		if (args->maxmem > max_chunk_mem)
+		{
+			args->maxmem = max_chunk_mem;
+		}
+		// Step 3. Determine minimum possible usage for specified number of chunks
+		uint64_t min_chunk_mem = base_mem;
+		min_chunk_mem += chunk_size * args->buffer_count;
+		// Step 4. Verify and calculate final parameters
+		// If requested memory usage is not possible, error
+		if (args->maxmem < base_mem) 
+		{
+			args->error = pfdg_error_mem_base;
+			//args->message = value_str;
+			return args;
+		}
+		// If minimum memory usage is higher than requested and a specific chunk count was specified, error
+		if (args->maxmem < min_chunk_mem && chunk_count_user_specified)
+		{
+			args->error = pfdg_error_mem_min;
+			//args->message = value_str;
+			return args;
+		}
+		// If minimum memory usage is higher than requested, try to reduce memory usage
+		if (args->maxmem < min_chunk_mem)
+		{
+            // Calculate max chunk size
+            chunk_size = (args->maxmem - base_mem) / args->buffer_count;
+            // Make sure that the chunks are not too tiny
+            if (chunk_size < 8)
+			{
+				args->error = pfdg_error_mem_chunk_size;
+				//args->message = value_str;
+				return args;
+			}
+            // Calculate chunk count
+			args->chunks = pfdg_mem_get_chunk_count_by_size(args->start, args->end, chunk_size);
+		}
+		// If requested memory usage is higher than minimum, and if writing to file, allow allocating more buffer space
+		else if (args->maxmem > min_chunk_mem && args->outfile)
+		{
+            uint64_t extra_mem = args->maxmem - min_chunk_mem;
+			// TODO: Maybe limit the amount of extra buffering
+            args->buffer_count += extra_mem / chunk_size;
+		}
+	}
 
 	return args;
 }

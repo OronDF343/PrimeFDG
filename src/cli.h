@@ -55,6 +55,7 @@ typedef struct {
 	uint64_t start;
 	uint64_t end;
 	int threads;
+	int buffer_count;
 	uint64_t chunks;
 	uint64_t maxmem;
 	char* outfile;

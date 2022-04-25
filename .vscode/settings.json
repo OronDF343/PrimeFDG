@@ -6,6 +6,11 @@
         "bitarray.h": "c",
         "stdafx.h": "c",
         "utils.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "random": "c",
+        "limits": "c",
+        "algorithm": "c",
+        "ranges": "c",
+        "vector": "c"
     }
 }

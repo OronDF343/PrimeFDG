@@ -193,6 +193,21 @@ int main(const int argc, char** argv)
 			else
 				printf("Error: Argument \"%s\" value does not meet precondition", args->message);
 			break;
+		case pfdg_error_mem_base:
+			if (args->message == NULL)
+				printf("Error: Not enough memory for essential data - Try increasing the value of \"maxmem\"");
+			else
+				printf("Error: Not enough memory for essential data (%s more bytes required) - Try increasing the value of \"maxmem\"", args->message);
+			break;
+		case pfdg_error_mem_min:
+			if (args->message == NULL)
+				printf("Error: Not enough memory for per-thread computation data - Try increasing the value of \"maxmem\" or \"chunks\", or decreasing the value of \"threads\"");
+			else
+				printf("Error: Not enough memory for per-thread computation data (%s more bytes required) - Try increasing the value of \"maxmem\" or \"chunks\", or decreasing the value of \"threads\"", args->message);
+			break;
+		case pfdg_error_mem_chunk_size:
+			printf("Error: Not enough memory for per-thread computation data - Try increasing the value of \"maxmem\" or decreasing the value of \"threads\"");
+			break;
 		}
 		printf("\nRun \"primefdg help\" for usage information.\n");
 		return 1;
