@@ -31,6 +31,12 @@ uint64_t pfdg_mem_get_chunk_count_by_size(const uint64_t start, const uint64_t e
 	return DIVUP(len, actual_size);
 }
 
+uint64_t pfdg_get_file_size(const uint64_t start, const uint64_t end)
+{
+	const uint64_t len = end - start;
+	return sizeof(pfdg_file_header) + DIVUP(len, BITS(BITARRAY_WORD) * 2) * sizeof(BITARRAY_WORD);
+}
+
 bitarray* pfdg_init_bitarray(const uint64_t capacity, const uint64_t offset, const bool use_pattern)
 {
 	bitarray* arr = bitarray_create(capacity, true);

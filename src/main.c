@@ -242,6 +242,12 @@ int main(const int argc, char** argv)
 	printf("Maximum memory usage: ");
 	pfdg_cli_print_bytes(args->maxmem);
 	printf("\n");
+	if (args->file_size > 0)
+	{
+		printf("Expected file size: ");
+		pfdg_cli_print_bytes(args->file_size);
+		printf("\n");
+	}
 	if (args->command == pfdg_command_mem)
 	{
 		return 0;

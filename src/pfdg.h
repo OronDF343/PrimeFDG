@@ -35,6 +35,8 @@ uint64_t pfdg_mem_get_base(const uint64_t start, const uint64_t end);
 uint64_t pfdg_mem_get_chunk_size(const uint64_t start, const uint64_t end, const uint64_t chunks);
 // Get number of chunks by chunk size
 uint64_t pfdg_mem_get_chunk_count_by_size(const uint64_t start, const uint64_t end, const uint64_t chunk_size);
+// File size
+uint64_t pfdg_get_file_size(const uint64_t start, const uint64_t end);
 
 bitarray* pfdg_init_bitarray(const uint64_t capacity, const uint64_t offset, const bool use_pattern);
 void pfdg_mark(bitarray* const arr, const uint64_t prime, const uint64_t offset);

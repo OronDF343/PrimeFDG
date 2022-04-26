@@ -58,6 +58,7 @@ typedef struct {
 	int buffer_count;
 	uint64_t chunks;
 	uint64_t maxmem;
+	uint64_t file_size;
 	char* outfile;
 	char* infile;
 	pfdg_error_t error;

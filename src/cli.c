@@ -103,6 +103,7 @@ pfdg_args_t *pfdg_cli_parse(const int argc, char **argv)
 	args->buffer_count = 0;
 	args->chunks = 0;
 	args->maxmem = 0;
+	args->file_size = 0;
 	args->outfile = NULL;
 	args->infile = NULL;
 	args->error = pfdg_success;
@@ -341,6 +342,9 @@ pfdg_args_t *pfdg_cli_parse(const int argc, char **argv)
 	args->maxmem = base_mem + chunk_size * args->buffer_count;
 	// Set actual buffer count excluding threads
 	args->buffer_count = args->buffer_count - args->threads;
+	// Calculate file size
+	if (args->outfile)
+		args->file_size = pfdg_get_file_size(args->start, args->end);
 
 	return args;
 }
