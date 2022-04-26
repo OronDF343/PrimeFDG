@@ -24,10 +24,10 @@ uint64_t pfdg_mem_get_chunk_size(const uint64_t start, const uint64_t end, const
 
 uint64_t pfdg_mem_get_chunk_count_by_size(const uint64_t start, const uint64_t end, const uint64_t chunk_size)
 {
-	// Account for 32-byte alignment (TODO: Refactor)
+	// Account for 32-byte alignment
 	uint64_t actual_size = (chunk_size / 32) * 32;
 	uint64_t len = end - start;
-	len = DIVUP(len, BITS(BITARRAY_WORD) * 2);
+	len = DIVUP(len, sizeof(BITARRAY_WORD) * 2);
 	return DIVUP(len, actual_size);
 }
 
