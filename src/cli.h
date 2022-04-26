@@ -67,3 +67,5 @@ typedef struct {
 pfdg_args_t* pfdg_cli_parse(const int argc, char** argv);
 
 void pfdg_cli_destroy(pfdg_args_t* args);
+
+void pfdg_cli_print_bytes(uint64_t bytes);

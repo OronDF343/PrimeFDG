@@ -226,7 +226,7 @@ int main(const int argc, char** argv)
 		printf("%s: The end of the range in which to find prime numbers. Supports exponent specifiers. Required.\n", PFDG_STR_ARG(pfdg_arg_end));
 		printf("%s: The number of threads to use for computation. If unspecified or equal to 0, will be set to the number of CPU threads available.\n", PFDG_STR_ARG(pfdg_arg_threads));
 		printf("%s: The number of tasks that the computation will be split into. Supports exponent specifiers. This is an advanced option that can be used to tune performance. If unspecified, the value will be calculated as such: %s * 2^MAX(floor(log10(%s)) - 1, 0)\n", PFDG_STR_ARG(pfdg_arg_chunks), PFDG_STR_ARG(pfdg_arg_threads), PFDG_STR_ARG(pfdg_arg_end));
-		printf("%s: Limits the maximum amount of memory to use for computation. Supports exponent specifiers. If the value of this argument is larger than the amount of memory required by default, and an output file is specified, the extra memory will be used for buffering.\n", PFDG_STR_ARG(pfdg_arg_maxmem));
+		printf("%s: Limits the maximum amount of memory to use for computation. Supports exponent specifiers. If the value of this argument is larger than the amount of memory required by default, and an output file is specified, the extra memory will be used for buffering. Note that the actual memory usage will usually be slightly higher.\n", PFDG_STR_ARG(pfdg_arg_maxmem));
 		printf("%s: The path to a file to which the computation results will be stored. If unspecified, the results will be discarded immediately.\n", PFDG_STR_ARG(pfdg_arg_outfile));
 		printf("\nUsage example: primefdg sieve end=1e12 threads=8\n");
 		printf("\nExponent specifiers (base 10): k,m,g,t,e\nExponent specifiers (base 2): K,M,G,T\n");
@@ -239,7 +239,9 @@ int main(const int argc, char** argv)
 	}
 
 	printf("Using %i threads, %llu chunks\n", args->threads, args->chunks);
-	printf("Maximum memory usage: %llu KiB\n", args->maxmem >> 10);
+	printf("Maximum memory usage: ");
+	pfdg_cli_print_bytes(args->maxmem);
+	printf("\n");
 	if (args->command == pfdg_command_mem)
 	{
 		return 0;
