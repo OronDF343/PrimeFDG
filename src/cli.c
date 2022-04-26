@@ -292,7 +292,11 @@ pfdg_args_t* pfdg_cli_parse(const int argc, char** argv)
 				return args;
 			}
             // Calculate chunk count
-			args->chunks = pfdg_mem_get_chunk_count_by_size(args->start, args->end, chunk_size);
+			uint64_t new_chunks = pfdg_mem_get_chunk_count_by_size(args->start, args->end, chunk_size);
+			// New chunk count may not be larger. This is due to differences in the rounding of chunk size.
+			// Only apply if the recommended number of chunks grew
+			if (new_chunks > args->chunks)
+				args->chunks = new_chunks;
 		}
 		// If requested memory usage is higher than minimum, and if writing to file, allow allocating more buffer space
 		else if (args->maxmem > min_chunk_mem && args->outfile)
