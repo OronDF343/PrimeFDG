@@ -40,5 +40,5 @@ bitarray* pfdg_init_bitarray(const uint64_t capacity, const uint64_t offset, con
 void pfdg_mark(bitarray* const arr, const uint64_t prime, const uint64_t offset);
 void pfdg_sieve_seed(bitarray* const arr, const bool skip);
 void pfdg_sieve(bitarray* const arr, bitarray* const known, const uint64_t offset, const bool skip);
-bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chunks, const char * const file, uint64_t * const prime_count);
+bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chunks, const uint64_t buffers, const char * const file, uint64_t * const prime_count);
 bool pfdg_generate_pattern(const uint64_t last_prime, const char * const file);
