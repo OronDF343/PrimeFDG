@@ -12,6 +12,11 @@
 #define STRICMP strcasecmp
 #endif
 
+#define KiB (1ull << 10)
+#define MiB (1ull << 20)
+#define GiB (1ull << 30)
+#define TiB (1ull << 40)
+
 bool pfdg_cli_parse_number(char *value_str, uint64_t *res)
 {
 	char *end;
@@ -31,7 +36,7 @@ bool pfdg_cli_parse_number(char *value_str, uint64_t *res)
 			++end;
 			break;
 		case 'K':
-			scale = 1ull << 10;
+			scale = KiB;
 			++end;
 			break;
 		case 'm':
@@ -39,7 +44,7 @@ bool pfdg_cli_parse_number(char *value_str, uint64_t *res)
 			++end;
 			break;
 		case 'M':
-			scale = 1ull << 20;
+			scale = MiB;
 			++end;
 			break;
 		case 'g':
@@ -47,7 +52,7 @@ bool pfdg_cli_parse_number(char *value_str, uint64_t *res)
 			++end;
 			break;
 		case 'G':
-			scale = 1ull << 30;
+			scale = GiB;
 			++end;
 			break;
 		case 't':
@@ -55,7 +60,7 @@ bool pfdg_cli_parse_number(char *value_str, uint64_t *res)
 			++end;
 			break;
 		case 'T':
-			scale = 1ull << 40;
+			scale = TiB;
 			++end;
 			break;
 		case 'e':
@@ -343,4 +348,28 @@ pfdg_args_t *pfdg_cli_parse(const int argc, char **argv)
 void pfdg_cli_destroy(pfdg_args_t *args)
 {
 	free(args);
+}
+
+void pfdg_cli_print_bytes(uint64_t bytes)
+{
+	if (bytes < KiB)
+	{
+		printf("%llu bytes", bytes);
+	}
+	else if (bytes < MiB)
+	{
+		printf("%.2f KiB", (double)bytes / KiB);
+	}
+	else if (bytes < GiB)
+	{
+		printf("%.2f MiB", (double)(bytes / KiB) / KiB);
+	}
+	else if (bytes < TiB)
+	{
+		printf("%.2f GiB", (double)(bytes / MiB) / KiB);
+	}
+	else
+	{
+		printf("%.2f TiB", (double)(bytes / GiB) / KiB);
+	}
 }
