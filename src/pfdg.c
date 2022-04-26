@@ -27,7 +27,7 @@ uint64_t pfdg_mem_get_chunk_count_by_size(const uint64_t start, const uint64_t e
 	// Account for 32-byte alignment
 	uint64_t actual_size = (chunk_size / 32) * 32;
 	uint64_t len = end - start;
-	len = DIVUP(len, sizeof(BITARRAY_WORD) * 2);
+	len = DIVUP(len, BITS(BITARRAY_WORD) * 2) * 8;
 	return DIVUP(len, actual_size);
 }
 
@@ -114,7 +114,7 @@ void pfdg_sieve(bitarray* const arr, bitarray* const known, const uint64_t offse
 			pfdg_mark(arr, i, offset);
 }
 
-bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chunks, const char * const file, uint64_t * const prime_count)
+bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chunks, const uint64_t buffers, const char * const file, uint64_t * const prime_count)
 {
 	// Step 1
 	bitarray* const known = pfdg_init_bitarray((uint64_t)sqrt((double)end) + 1, 0, true);
@@ -145,7 +145,7 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chun
 			fwrite(&h, sizeof(pfdg_file_header), 1, f);
 		}
 
-		io_init(f, chunks);
+		io_init(f, buffers);
 	}
 
 	//PFDG_TIMESTAMP t_start, t_end;

@@ -12,9 +12,9 @@
 #define STRICMP strcasecmp
 #endif
 
-bool pfdg_cli_parse_number(char* value_str, uint64_t* res)
+bool pfdg_cli_parse_number(char *value_str, uint64_t *res)
 {
-	char* end;
+	char *end;
 	unsigned long long value = strtoull(value_str, &end, 0);
 	if (end == value_str || value >= UINT64_MAX)
 	{
@@ -61,7 +61,7 @@ bool pfdg_cli_parse_number(char* value_str, uint64_t* res)
 		case 'e':
 		case 'E':
 		{
-			char* end2;
+			char *end2;
 			unsigned long long exponent = strtoull(end + 1, &end2, 10);
 			if (end2 != end + 1 && exponent < POWERS_LEN)
 			{
@@ -69,7 +69,7 @@ bool pfdg_cli_parse_number(char* value_str, uint64_t* res)
 				end = end2;
 			}
 		}
-			break;
+		break;
 		}
 
 		if (*end != 0)
@@ -86,10 +86,11 @@ bool pfdg_cli_parse_number(char* value_str, uint64_t* res)
 	return true;
 }
 
-pfdg_args_t* pfdg_cli_parse(const int argc, char** argv)
+pfdg_args_t *pfdg_cli_parse(const int argc, char **argv)
 {
-	pfdg_args_t* args = malloc(sizeof(pfdg_args_t));
-	if (!args) return NULL;
+	pfdg_args_t *args = malloc(sizeof(pfdg_args_t));
+	if (!args)
+		return NULL;
 	args->command = pfdg_command_none;
 	args->start = 1;
 	args->end = 0;
@@ -151,8 +152,8 @@ pfdg_args_t* pfdg_cli_parse(const int argc, char** argv)
 	// Parse arguments
 	for (int i = 2; i < argc; ++i)
 	{
-		char* name_str = argv[i];
-		char* value_str = strchr(argv[i], '=');
+		char *name_str = argv[i];
+		char *value_str = strchr(argv[i], '=');
 		if (!value_str)
 		{
 			// Invalid argument
@@ -174,7 +175,7 @@ pfdg_args_t* pfdg_cli_parse(const int argc, char** argv)
 		}
 		else if (STRICMP(name_str, PFDG_STR_ARG(pfdg_arg_threads)) == 0)
 		{
-			char* end;
+			char *end;
 			unsigned long value = strtoul(value_str, &end, 0);
 			if (end == value_str || value >= INT_MAX)
 			{
@@ -238,79 +239,108 @@ pfdg_args_t* pfdg_cli_parse(const int argc, char** argv)
 	{
 		chunk_count_user_specified = false;
 		uint64_t l = (uint64_t)log10floor(args->end);
-		if (l > 0) l--;
+		if (l > 0)
+			l--;
 		args->chunks = (uint64_t)args->threads << l;
 	}
-	
+
 	args->buffer_count = args->threads;
 	if (args->outfile)
 	{
 		args->buffer_count += 1;
 	}
-	
-	if (args->maxmem > 0)
+
+	bool maxmem_user_specified = !(args->maxmem == 0);
+	if (!maxmem_user_specified)
 	{
-		// Apply defaults for maxmem
-		// Step 1. Determine required memory for supporting data
-		// static pattern + prefix + known primes
-		uint64_t base_mem = pfdg_mem_get_base(args->start, args->end);
-		// Step 2. Determine maximum possible usage for specified number of chunks - limit requested memory to that
-		uint64_t chunk_size = pfdg_mem_get_chunk_size(args->start, args->end, args->chunks);
-		uint64_t max_chunk_mem = base_mem + chunk_size * args->chunks;
-		if (args->maxmem > max_chunk_mem)
+		// TODO: Determine available system memory
+	}
+
+	// Apply defaults for maxmem
+	// Step 1. Determine required memory for supporting data
+	// static pattern + prefix + known primes
+	uint64_t base_mem = pfdg_mem_get_base(args->start, args->end);
+	// Step 2. Determine maximum possible usage for specified number of chunks - limit requested memory to that
+	uint64_t chunk_size = pfdg_mem_get_chunk_size(args->start, args->end, args->chunks);
+	//printf("chunk_size %llu\n", chunk_size);
+	uint64_t max_chunk_mem = base_mem + chunk_size * args->chunks;
+	if (!maxmem_user_specified || args->maxmem > max_chunk_mem)
+	{
+		args->maxmem = max_chunk_mem;
+	}
+	// Step 3. Determine minimum possible usage for specified number of chunks
+	uint64_t min_chunk_mem = base_mem;
+	min_chunk_mem += chunk_size * args->buffer_count;
+	// Step 4. Verify and calculate final parameters
+	// If requested memory usage is not possible, error
+	if (args->maxmem < base_mem)
+	{
+		args->error = pfdg_error_mem_base;
+		// args->message = value_str;
+		return args;
+	}
+	// If minimum memory usage is higher than requested and a specific chunk count was specified, error
+	if (args->maxmem < min_chunk_mem && chunk_count_user_specified)
+	{
+		args->error = pfdg_error_mem_min;
+		// args->message = value_str;
+		return args;
+	}
+	// If minimum memory usage is higher than requested, try to reduce memory usage
+	if (args->maxmem < min_chunk_mem)
+	{
+		// Calculate max chunk size
+		uint64_t new_chunk_size = (args->maxmem - base_mem) / args->buffer_count;
+		// Round down to multiple of 32 bytes
+		new_chunk_size = (new_chunk_size / 32) * 32;
+		//printf("new_chunk_size %llu\n", new_chunk_size);
+		// Make sure that the chunks are not too tiny
+		if (new_chunk_size < 32)
 		{
-			args->maxmem = max_chunk_mem;
-		}
-		// Step 3. Determine minimum possible usage for specified number of chunks
-		uint64_t min_chunk_mem = base_mem;
-		min_chunk_mem += chunk_size * args->buffer_count;
-		// Step 4. Verify and calculate final parameters
-		// If requested memory usage is not possible, error
-		if (args->maxmem < base_mem) 
-		{
-			args->error = pfdg_error_mem_base;
-			//args->message = value_str;
+			args->error = pfdg_error_mem_chunk_size;
+			// args->message = value_str;
 			return args;
 		}
-		// If minimum memory usage is higher than requested and a specific chunk count was specified, error
-		if (args->maxmem < min_chunk_mem && chunk_count_user_specified)
+		// Calculate chunk count
+		uint64_t new_chunks = pfdg_mem_get_chunk_count_by_size(args->start, args->end, new_chunk_size);
+		// New chunk count may not be larger. This is due to the last chunk potentially being smaller than the others due to rounding up the size.
+		// Only apply if the recommended number of chunks grew
+		if (new_chunks > args->chunks)
 		{
-			args->error = pfdg_error_mem_min;
-			//args->message = value_str;
-			return args;
-		}
-		// If minimum memory usage is higher than requested, try to reduce memory usage
-		if (args->maxmem < min_chunk_mem)
-		{
-            // Calculate max chunk size
-            chunk_size = (args->maxmem - base_mem) / args->buffer_count;
-            // Make sure that the chunks are not too tiny
-            if (chunk_size < 8)
-			{
-				args->error = pfdg_error_mem_chunk_size;
-				//args->message = value_str;
-				return args;
-			}
-            // Calculate chunk count
-			uint64_t new_chunks = pfdg_mem_get_chunk_count_by_size(args->start, args->end, chunk_size);
-			// New chunk count may not be larger. This is due to differences in the rounding of chunk size.
-			// Only apply if the recommended number of chunks grew
-			if (new_chunks > args->chunks)
-				args->chunks = new_chunks;
-		}
-		// If requested memory usage is higher than minimum, and if writing to file, allow allocating more buffer space
-		else if (args->maxmem > min_chunk_mem && args->outfile)
-		{
-            uint64_t extra_mem = args->maxmem - min_chunk_mem;
-			// TODO: Maybe limit the amount of extra buffering
-            args->buffer_count += extra_mem / chunk_size;
+			args->chunks = new_chunks;
+			// Recalculate chunk size
+			chunk_size = pfdg_mem_get_chunk_size(args->start, args->end, args->chunks);
 		}
 	}
+	// If requested memory usage is higher than minimum, and if writing to file, allow allocating more buffer space
+	else if (args->maxmem > min_chunk_mem && args->outfile)
+	{
+		uint64_t extra_mem = args->maxmem - min_chunk_mem;
+		uint64_t additional_buffers = extra_mem / chunk_size;
+		// Limit the amount of extra buffering
+		// If memory limit is not specified by user, limit buffer count based on thread count
+		// args->buffer_count is currently equal to args->threads + 1
+		// Limit to args->threads * 2
+		if (!maxmem_user_specified && additional_buffers > args->threads - 1)
+		{
+			additional_buffers = args->threads - 1;
+		}
+		args->buffer_count += additional_buffers;
+		// Limit to number of chunks
+		if (args->buffer_count > args->chunks)
+		{
+			args->buffer_count = args->chunks;
+		}
+	}
+	// Set actual memory usage
+	args->maxmem = base_mem + chunk_size * args->buffer_count;
+	// Set actual buffer count excluding threads
+	args->buffer_count = args->buffer_count - args->threads;
 
 	return args;
 }
 
-void pfdg_cli_destroy(pfdg_args_t* args)
+void pfdg_cli_destroy(pfdg_args_t *args)
 {
 	free(args);
 }
