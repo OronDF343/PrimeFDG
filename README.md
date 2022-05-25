@@ -32,7 +32,7 @@ Exponent specifiers (base 2): K,M,G,T
 ```
 
 ## Building
-### On Linux (CMake + GCC)
+### On Linux (CMake + GCC/Clang)
 Prerequisites (on Debian):
 ```
 sudo apt install git build-essential cmake
@@ -51,7 +51,7 @@ It is also possible to use VSCode with the following extension packs:
 
 ### On Windows (MSVC)
 Prerequisites:
-* Visual Studio 2019 version 16.9 or newer
+* Visual Studio 2019 (version 16.9 or newer) or 2022
 * Desktop C++ workload
 * MSVC v142 toolchain
 * Windows SDK version 10
@@ -63,7 +63,7 @@ Testing performed 2022-03-04:
 * RAM: 64GB (4x16) DDR4 @ 3733MHz CL16 with tweaked subtimings
 * OS: Windows 10 x64 20H2
 * The results were not saved to file, in order to measure pure calculation performance
-* Command line: `PrimeFDG.exe 1 <range> <threads>`
+* Command line: `primefdg sieve end=<range> threads=<threads>`
 * Results are based on a very small number of runs (1 <= N <= 10)
 * Number of primes does not include the prime `2`
 
