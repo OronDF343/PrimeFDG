@@ -120,6 +120,15 @@ void pfdg_sieve(bitarray* const arr, bitarray* const known, const uint64_t offse
 			pfdg_mark(arr, i, offset);
 }
 
+#ifndef PFDG_LEGACY_KNOWN_PRIMES
+// New sieve implementation
+void pfdg_sieve_v2(bitarray* const arr, const uint64_t offset, uint64_t* const known_primes, const uint64_t known_count)
+{
+	for (uint64_t i = 0; i < known_count; ++i)
+		pfdg_mark(arr, known_primes[i], offset);
+}
+#endif
+
 bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chunks, const uint64_t buffers, const char * const file, uint64_t * const prime_count)
 {
 	// Step 1
@@ -129,6 +138,35 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chun
 	/*FILE* k;
 	fopen_s(&k, "C:\\Users\\Oron\\k.2", "ab");
 	bitarray_serialize_to_file(known, k);*/
+
+#ifndef PFDG_LEGACY_KNOWN_PRIMES
+	// do not save skipped primes (they are in the precomputed pattern)
+	// Setting all odd numbers from 3 to PFDG_PATTERN_SKIP (exclusive) will do this for sure without unreadable bitmasks
+	for (uint64_t i = 3; i < PFDG_PATTERN_SKIP; i += 2)
+		bitarray_set(known, i);
+	
+	// allocate memory for primes
+	const uint64_t known_count = bitarray_count(known, false);
+	//printf("Known count: %llu\n", known_count);
+	uint64_t* known_primes = ALIGNED_MALLOC(sizeof(uint64_t) * known_count, 32);
+	
+	// populate list of primes
+	uint64_t j = 0;
+	for (uint64_t i = PFDG_PATTERN_SKIP; i < known->capacity; i += 2)
+	{
+		if (!bitarray_get(known, i))
+		{
+			// Check for oopsie (TODO: Improve error messages)
+			if (j >= known_count) return UINT32_MAX;
+			// Save prime number
+			known_primes[j] = i;
+			// Increment prime index
+			++j;
+		}
+	}
+
+	bitarray_delete(known);
+#endif
 
 	// Step 2 parameters
 	const uint64_t len = end - start;
@@ -183,7 +221,11 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chun
 			else
 			{
 				// Sieve it!
+#ifdef PFDG_LEGACY_KNOWN_PRIMES
 				pfdg_sieve(arr, known, offset, true);
+#else
+				pfdg_sieve_v2(arr, offset, known_primes, known_count);
+#endif
 				// Count the primes
 				const uint64_t count = bitarray_count(arr, false);
 				// Increment counter atomically to prevent race conditions
@@ -207,6 +249,10 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chun
 			}
 		}
 	}
+	
+#ifdef PFDG_LEGACY_KNOWN_PRIMES
+	bitarray_delete(known);
+#endif
 
 	//pfdg_timestamp_get(&t_end);
 	//const PFDG_TIMESTAMP diff = pfdg_timestamp_diff(t_start, t_end);
