@@ -95,7 +95,7 @@ void pfdg_mark(bitarray* const arr, const uint64_t prime, const uint64_t offset)
 	// Odd multiples only
 	else if (i % 2 == 0) ++i;
 	// Reference implementation:
-	/*for (; i * prime - offset < arr->capacity; i += 2)
+	/*for (; i * prime - offset <= arr->capacity; i += 2)
 		bitarray_set(arr, i * prime - offset);*/
 	// Janky OpenMP SIMD implementation: (sometimes has ~10% performance improvement)
 	uint64_t limit = (uint64_t)ceil(((double)(arr->capacity + offset) / (double) prime - 1) / 2.0);
@@ -108,14 +108,14 @@ void pfdg_mark(bitarray* const arr, const uint64_t prime, const uint64_t offset)
 
 void pfdg_sieve_seed(bitarray* const arr, const bool skip)
 {
-	for (uint64_t i = skip ? PFDG_PATTERN_SKIP : 3; i < arr->capacity; i += 2)
+	for (uint64_t i = skip ? PFDG_PATTERN_SKIP : 3; i <= arr->capacity; i += 2)
 		if (!bitarray_get(arr, i))
 			pfdg_mark(arr, i, 0);
 }
 
 void pfdg_sieve(bitarray* const arr, bitarray* const known, const uint64_t offset, const bool skip)
 {
-	for (uint64_t i = skip ? PFDG_PATTERN_SKIP : 3; i < known->capacity; i += 2)
+	for (uint64_t i = skip ? PFDG_PATTERN_SKIP : 3; i <= known->capacity; i += 2)
 		if (!bitarray_get(known, i))
 			pfdg_mark(arr, i, offset);
 }
@@ -152,7 +152,7 @@ bool pfdg_sieve_parallel(const uint64_t start, const uint64_t end, uint64_t chun
 	
 	// populate list of primes
 	uint64_t j = 0;
-	for (uint64_t i = PFDG_PATTERN_SKIP; i < known->capacity; i += 2)
+	for (uint64_t i = PFDG_PATTERN_SKIP; i <= known->capacity; i += 2)
 	{
 		if (!bitarray_get(known, i))
 		{
